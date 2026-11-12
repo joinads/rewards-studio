@@ -1,0 +1,45 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "joinads/reward-action",
+  "version": "0.2.0",
+  "title": "Ação do reward",
+  "category": "design",
+  "icon": "video-alt3",
+  "description": "Botão conectado ao anúncio ou fechamento do reward nativo.",
+  "attributes": {
+    "label": {
+      "type": "string",
+      "default": "Assistir anúncio e continuar"
+    },
+    "action": {
+      "type": "string",
+      "default": "watch"
+    },
+    "icon": {
+      "type": "string",
+      "default": "none"
+    },
+    "variant": {
+      "type": "string",
+      "default": "auto"
+    }
+  },
+  "supports": {
+    "html": false,
+    "color": {
+      "text": true,
+      "background": true
+    },
+    "typography": {
+      "fontSize": true
+    },
+    "spacing": {
+      "margin": true,
+      "padding": true
+    }
+  },
+  "editorScript": "ja-reward-action-editor",
+  "render": "file:./render.php",
+  "style": "ja-reward-studio-style"
+}

@@ -1,0 +1,79 @@
+name: Test and release
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: rewards-studio-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run version:check
+      - run: npm test
+      - run: npm run test:updates
+      - run: npm run lint
+      - run: npm run package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ github.sha }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            dist/rewards-studio.zip
+            dist/update.json
+            dist/SHA256SUMS
+            dist/release-notes.md
+  publish:
+    needs: verify
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-${{ github.sha }}
+          path: dist
+      - name: Publish the version as a public release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat VERSION)"
+          tag="v${version}"
+          state="$(gh release view "$tag" --json isDraft --jq '.isDraft' 2>/dev/null || echo missing)"
+          if [[ "$state" == false ]]; then
+            echo "Release $tag already published. Increase VERSION to distribute new code."
+            exit 0
+          fi
+          latest="$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq '.tag_name' 2>/dev/null || true)"
+          python3 - "$version" "$latest" <<'PY'
+          import re, sys
+          version, latest = sys.argv[1:]
+          if re.fullmatch(r'v?\d+\.\d+\.\d+', latest):
+              numbers = lambda v: tuple(map(int, v.lstrip('v').split('.')))
+              if numbers(version) <= numbers(latest):
+                  sys.exit('Refusing to publish an older version as latest')
+          PY
+          if [[ "$state" == missing ]]; then
+            gh release create "$tag" --target "$GITHUB_SHA" --title "Rewards Studio by CORE ( JOINADS ) $version" --notes-file dist/release-notes.md --draft
+          fi
+          gh release upload "$tag" dist/rewards-studio.zip dist/update.json dist/SHA256SUMS --clobber
+          gh release edit "$tag" --draft=false --latest

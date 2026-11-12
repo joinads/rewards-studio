@@ -1,0 +1,16 @@
+{
+  "name": "rewards-studio",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "lint": "find joinads-reward-studio -name '*.php' -exec php -l {} \\;",
+    "package": "python3 scripts/package.py",
+    "test:updates": "php tests/updater.php",
+    "version:check": "python3 scripts/version.py --check",
+    "release:version": "python3 scripts/version.py"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0"
+  },
+  "version": "0.3.2"
+}

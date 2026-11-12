@@ -1,0 +1,107 @@
+/* Editor-only workspace. Frontend and advertising controls are unaffected. */
+.ja-studio-launcher { padding:24px 20px; color:#172033; }
+.ja-studio-eyebrow { display:block; font-size:10px; font-weight:750; letter-spacing:.12em; color:#60718c; }
+.ja-studio-launcher h2 { font-size:23px; line-height:1.2; letter-spacing:-.6px; margin:12px 0; }
+.ja-studio-launcher > p { line-height:1.65; color:#657087; }
+.ja-studio-launcher h3 { margin:30px 0 14px; font-size:13px; }
+.ja-open-studio.components-button { width:100%; justify-content:center; min-height:44px; border-radius:8px; margin-top:10px; background:#2563eb; }
+.ja-studio-modal.components-modal__frame { width:calc(100vw - 48px)!important; max-width:1600px!important; height:calc(100dvh - 48px)!important; max-height:none!important; border-radius:16px; color:#182238; box-shadow:0 24px 100px #101b3c40; }
+.ja-studio-modal .components-modal__header { border-bottom:1px solid #e6eaf0; padding:0 24px; }
+.ja-studio-modal .components-modal__header-heading { font-size:15px; font-weight:650; }
+.ja-studio-modal .components-modal__content { display:flex; flex-direction:column; min-height:0; overflow:hidden; padding:0!important; margin-top:60px; }
+.ja-studio-toolbar { flex:none; display:flex; align-items:center; justify-content:space-between; gap:20px; padding:16px 24px; background:#fff; border-bottom:1px solid #e6eaf0; }
+.ja-studio-brand { display:flex; align-items:center; gap:12px; }
+.ja-brand-mark { display:grid; place-items:center; width:38px; height:38px; border-radius:11px; background:#2563eb; color:#fff; font-size:25px; font-weight:800; }
+.ja-studio-brand strong { display:block; font-size:14px; font-weight:650; }
+.ja-studio-brand small { display:block; margin-top:4px; font-size:12px; color:#758098; }
+.ja-device-switch { display:flex; padding:4px; background:#edf1f7; border-radius:9px; gap:3px; }
+.ja-device-switch button { border:0; padding:8px 18px; background:transparent; border-radius:6px; color:#63708a; cursor:pointer; font:600 12px system-ui; }
+.ja-device-switch button[aria-pressed="true"] { background:#fff; color:#1e40af; box-shadow:0 1px 4px #15326415; }
+.ja-studio-actions { display:flex; gap:8px; align-items:center; }
+.ja-studio-actions .components-button.is-primary { border-radius:7px; padding-inline:22px; background:#2563eb; }
+.ja-studio-workspace { flex:1; min-height:0; display:grid; grid-template-columns:336px minmax(0,1fr); }
+.ja-studio-controls { min-height:0; display:flex; flex-direction:column; border-right:1px solid #e1e7f0; background:#fff; }
+.ja-studio-tabs { flex:none; display:grid; grid-template-columns:repeat(4,1fr); padding:0 12px; border-bottom:1px solid #e6eaf0; }
+.ja-studio-tabs button { position:relative; background:none; border:0; padding:18px 6px 16px; cursor:pointer; font:600 12px system-ui; color:#738098; }
+.ja-studio-tabs button[aria-selected="true"] { color:#2563eb; }
+.ja-studio-tabs button[aria-selected="true"]::after { content:''; height:3px; position:absolute; bottom:0; inset-inline:8px; border-radius:3px 3px 0 0; background:#2563eb; }
+.ja-studio-scroll { overflow:auto; min-height:0; padding:22px; scrollbar-width:thin; scrollbar-color:#c4ccda transparent; }
+.ja-studio-section { margin:0 0 26px; }
+.ja-studio-section h3,.ja-content-editor h3 { margin:0 0 9px; font-size:13px; font-weight:700; line-height:1.5; color:#1b2943; }
+.ja-help { font-size:12px; line-height:1.6; color:#778197; margin:0 0 16px; }
+.ja-format-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.ja-format-card { position:relative; min-width:0; display:flex; flex-direction:column; text-align:left; padding:10px; border:1px solid #e0e5ed; border-radius:10px; background:#fff; color:#33415b; cursor:pointer; transition:border-color .15s,box-shadow .15s; }
+.ja-format-card:hover { border-color:#8faeea; box-shadow:0 2px 8px #1e3a8a0a; }
+.ja-format-card.is-selected { background:#f3f7ff; border-color:#2563eb; box-shadow:0 0 0 1px #2563eb; color:#1d4ed8; }
+.ja-format-title { font:650 12px/1.4 system-ui; margin:9px 0 3px; }
+.ja-format-description { font:11px/1.45 system-ui; color:#7a8599; }
+.ja-format-check { position:absolute; right:8px; top:6px; font-size:12px; font-weight:800; color:#2563eb; }
+.ja-format-icon { position:relative; display:block; width:100%; height:58px; border-radius:5px; background:#edf0f6; overflow:hidden; }
+.ja-format-window { position:absolute; display:flex; flex-direction:column; gap:4px; left:27%; right:27%; top:18%; bottom:18%; border:1px solid #bac8df; border-radius:3px; padding:6px; background:#fff; box-shadow:0 2px 4px #1a305412; }
+.ja-format-window i { height:2px; background:#d5deed; width:80%; }
+.ja-format-window i:first-child { background:#8399bf; width:60%; }
+.ja-format-window b { height:5px; background:#89abf0; margin-top:auto; border-radius:1px; }
+.is-full .ja-format-window { inset:3px; border-radius:2px; padding:8px 18px; }
+.is-bottom .ja-format-window { inset:auto 3px 3px; height:28px; padding:4px 10px; }
+.is-side .ja-format-window { inset:3px 3px 3px auto; width:42%; padding:5px; }
+.is-compact .ja-format-description { display:none; }
+.ja-device-hint { background:#edf4ff; color:#2c5db2; font-size:11px; font-weight:650; padding:9px 12px; border-radius:6px; margin-bottom:22px; }
+.ja-studio-disclosure { border-top:1px solid #e8ecf2; }
+.ja-studio-disclosure > summary { position:relative; list-style:none; cursor:pointer; padding:17px 22px 17px 0; font-size:12px; font-weight:650; color:#354660; }
+.ja-studio-disclosure > summary::-webkit-details-marker { display:none; }
+.ja-studio-disclosure > summary::after { content:'+'; position:absolute; right:2px; color:#8292ac; font-size:16px; top:13px; }
+.ja-studio-disclosure[open] > summary::after { content:'−'; }
+.ja-studio-disclosure > div { padding:4px 0 16px; }
+.ja-studio-scroll .components-base-control { margin-bottom:20px; }
+.ja-studio-scroll .components-base-control__label,.ja-studio-scroll .components-input-control__label { text-transform:none!important; font-size:12px!important; font-weight:550!important; letter-spacing:0!important; color:#53627b; }
+.ja-studio-scroll .components-text-control__input,.ja-studio-scroll .components-select-control__input { border-color:#d4dce7!important; border-radius:6px!important; }
+.ja-editor-color { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:15px; font-size:12px; color:#53627b; }
+.ja-color-input { display:flex; align-items:center; gap:7px; border:1px solid #dbe2ec; border-radius:6px; padding:4px 6px; background:#fff; }
+.ja-color-input code { font-size:10px; background:transparent; padding:0; color:#64748b; }
+.ja-color-input input { width:24px; height:24px; padding:0; border:0; border-radius:4px; background:none; cursor:pointer; }
+.ja-palette-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.ja-palette-card { border:1px solid #dfe5ef; border-radius:7px; padding:8px 4px; background:#fff; cursor:pointer; color:#66738b; font:11px system-ui; }
+.ja-palette-card:hover { border-color:#2563eb; color:#2563eb; }
+.ja-palette-colors { display:flex; justify-content:center; margin-bottom:8px; padding-inline-start:5px; }
+.ja-palette-colors i { height:16px; width:16px; border:1px solid #00000015; border-radius:50%; margin-left:-4px; }
+.ja-studio-image > img { width:100%; max-height:150px; object-fit:cover; border-radius:8px; display:block; margin-bottom:10px; }
+.ja-image-empty { padding:24px 14px; background:#f3f6fb; border:1px dashed #c9d3e4; border-radius:8px; font-size:12px; text-align:center; color:#7a879e; margin-bottom:12px; }
+.ja-content-list { display:flex; flex-direction:column; gap:5px; }
+.ja-content-row { width:100%; display:flex; align-items:center; gap:10px; border:1px solid #e4e9f1; border-radius:7px; padding:10px; cursor:pointer; text-align:left; background:#fff; color:#53627d; min-width:0; }
+.ja-content-row.is-selected { background:#f0f5ff; border-color:#8eaff3; }
+.ja-content-row strong { display:block; font:600 12px/1.5 system-ui; }
+.ja-content-row small { display:block; font:11px/1.5 system-ui; color:#8994a7; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:218px; }
+.ja-content-index { font:10px ui-monospace,monospace; color:#99a7bd; }
+.ja-content-editor { padding:18px 14px 0; border-radius:8px; border:1px solid #d9e4f8; background:#f7faff; margin-bottom:24px; }
+.ja-control-label { display:block; font-size:12px; color:#53627b; margin:12px 0 8px; }
+.ja-studio-richtext { padding:12px; border:1px solid #b9c9e5; border-radius:6px; background:#fff; font-size:14px; min-height:80px; margin-bottom:12px; line-height:1.6; }
+.ja-add-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+.ja-add-grid .components-button { justify-content:flex-start; border-radius:6px; padding:8px; font-size:11px; min-height:34px; }
+.ja-studio-canvas { min-width:0; min-height:0; display:flex; flex-direction:column; background:#f1f4f9; }
+.ja-preview-area { flex:1; min-height:0; display:flex; flex-direction:column; }
+.ja-preview-caption { flex:none; display:flex; justify-content:space-between; gap:12px; padding:16px 24px; font-size:11px; color:#8490a5; }
+.ja-preview-state { color:#658478; }
+.ja-preview-stage { flex:1; min-height:0; overflow:auto; padding:12px 24px 24px; display:grid; justify-items:center; align-content:start; scrollbar-width:thin; }
+.ja-preview-device { position:relative; flex:none; overflow:hidden; box-shadow:0 12px 40px #20335616; border-radius:8px; background:#fff; outline:1px solid #d4dce8; }
+.ja-preview-device.is-mobile { border-radius:26px; outline:6px solid #28354d; margin:8px; }
+.ja-preview-device iframe { display:block; border:0; background:#e8eef6; }
+.ja-preview-footnote { flex:none; margin:0; padding:8px 24px 18px; text-align:center; font-size:11px; color:#95a0b2; line-height:1.5; }
+.ja-preview-options { flex:none; border-top:1px solid #e0e6ef; padding:12px 24px; display:flex; justify-content:space-between; gap:16px; align-items:start; background:#f8fafd; }
+.ja-preview-options details { flex:1; }
+.ja-preview-options summary { cursor:pointer; color:#66758d; font-size:12px; padding:6px 0; }
+.ja-preview-options details > div { display:flex; gap:12px; padding-top:14px; }
+.ja-preview-options .components-base-control { flex:1; min-width:0; margin:0; }
+.ja-studio-footer { flex:none; display:flex; justify-content:space-between; gap:12px; padding:12px 24px; font-size:10px; color:#99a3b5; background:#fff; border-top:1px solid #e6eaf0; }
+.ja-studio-warning { flex:none; padding:8px 24px; background:#fff8e8; color:#805c19; font-size:12px; }
+.ja-reset-confirm { border:1px solid #edd5c0; padding:12px; margin-top:12px; border-radius:6px; background:#fff9f2; }
+.ja-studio-modal button:focus-visible,.ja-studio-launcher button:focus-visible,.ja-studio-disclosure > summary:focus-visible { outline:2px solid #2563eb; outline-offset:3px; }
+@media(max-width:1050px) { .ja-studio-workspace{grid-template-columns:300px minmax(0,1fr)}.ja-studio-brand small{display:none}.ja-studio-toolbar{gap:10px;padding:12px 18px}.ja-studio-brand strong{font-size:12px}.ja-studio-actions .components-button{font-size:11px;padding-inline:10px}.ja-device-switch button{padding:8px 12px}.ja-content-row small{max-width:180px} }
+@media(max-width:760px) { .ja-studio-modal.components-modal__frame{width:100vw!important;height:100dvh!important;border-radius:0}.ja-studio-workspace{grid-template-columns:1fr;grid-template-rows:minmax(180px,45%) minmax(200px,1fr)}.ja-studio-controls{border-right:0;border-bottom:1px solid #dce4ef}.ja-studio-toolbar{flex-wrap:wrap}.ja-studio-brand{display:none}.ja-studio-scroll{padding:16px}.ja-studio-footer span:last-child{display:none}.ja-preview-caption{padding:10px 18px}.ja-preview-footnote{display:none}.ja-preview-options{padding:8px 16px}.ja-studio-tabs button{padding:12px 6px}.ja-studio-actions{margin-left:auto} }
+@media(prefers-reduced-motion:reduce){.ja-format-card{transition:none}}
+.ja-preview-zoom { padding:0; background:none; border:0; color:#647caa; font:inherit; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
+/* Newer WordPress versions wrap modal children in a separate container. */
+.ja-studio-modal .components-modal__children-container { display:flex; flex-direction:column; flex:1; min-height:0; overflow:hidden; }
+.ja-studio-scroll select { border:1px solid #d4dce7!important; border-radius:6px!important; box-shadow:none!important; }
+.ja-studio-entry { display:block!important; padding-top:12px; }
+.ja-studio-entry .ja-help { font-size:12px; line-height:1.5; margin:0 0 8px; }
+.ja-studio-entry .ja-open-studio { display:flex; margin:0 0 4px; }

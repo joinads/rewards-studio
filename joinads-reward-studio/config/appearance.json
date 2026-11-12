@@ -1,0 +1,869 @@
+{
+  "groups": {
+    "layout": "Tamanho e posição",
+    "surface": "Janela e imagem de fundo",
+    "overlay": "Fundo externo",
+    "type": "Textos e fontes",
+    "button": "Botões e carregamento",
+    "mobile": "Celular (até 640 px)",
+    "motion": "Animação"
+  },
+  "fields": {
+    "widthMode": {
+      "type": "string",
+      "label": "Largura da janela",
+      "group": "layout",
+      "default": "fixed",
+      "options": [
+        {
+          "value": "fixed",
+          "label": "Definir em pixels"
+        },
+        {
+          "value": "full",
+          "label": "Preencher a tela"
+        }
+      ]
+    },
+    "width": {
+      "type": "number",
+      "label": "Largura (px)",
+      "group": "layout",
+      "default": 560,
+      "min": 280,
+      "max": 1600,
+      "step": 1
+    },
+    "heightMode": {
+      "type": "string",
+      "label": "Altura",
+      "group": "layout",
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Ajustar ao conteúdo"
+        },
+        {
+          "value": "fixed",
+          "label": "Definir em pixels"
+        },
+        {
+          "value": "full",
+          "label": "Preencher a tela"
+        }
+      ]
+    },
+    "height": {
+      "type": "number",
+      "label": "Altura fixa (px)",
+      "group": "layout",
+      "default": 560,
+      "min": 160,
+      "max": 1600,
+      "step": 1
+    },
+    "minHeight": {
+      "type": "number",
+      "label": "Altura mínima (px)",
+      "group": "layout",
+      "default": 0,
+      "min": 0,
+      "max": 1000,
+      "step": 1
+    },
+    "maxHeight": {
+      "type": "number",
+      "label": "Limite da altura (% da tela)",
+      "group": "layout",
+      "default": 90,
+      "min": 30,
+      "max": 100,
+      "step": 1
+    },
+    "position": {
+      "type": "string",
+      "label": "Posição",
+      "group": "layout",
+      "default": "center",
+      "options": [
+        {
+          "value": "center",
+          "label": "Centro"
+        },
+        {
+          "value": "top",
+          "label": "Topo"
+        },
+        {
+          "value": "bottom",
+          "label": "Rodapé"
+        },
+        {
+          "value": "left",
+          "label": "Esquerda"
+        },
+        {
+          "value": "right",
+          "label": "Direita"
+        },
+        {
+          "value": "top-left",
+          "label": "Topo à esquerda"
+        },
+        {
+          "value": "top-right",
+          "label": "Topo à direita"
+        },
+        {
+          "value": "bottom-left",
+          "label": "Rodapé à esquerda"
+        },
+        {
+          "value": "bottom-right",
+          "label": "Rodapé à direita"
+        }
+      ]
+    },
+    "inset": {
+      "type": "number",
+      "label": "Distância das bordas da tela (px)",
+      "group": "layout",
+      "default": 24,
+      "min": 0,
+      "max": 96,
+      "step": 1
+    },
+    "padding": {
+      "type": "number",
+      "label": "Espaçamento interno (px)",
+      "group": "layout",
+      "default": 32,
+      "min": 0,
+      "max": 120,
+      "step": 1
+    },
+    "radius": {
+      "type": "number",
+      "label": "Arredondamento (px)",
+      "group": "surface",
+      "default": 24,
+      "min": 0,
+      "max": 120,
+      "step": 1
+    },
+    "borderWidth": {
+      "type": "number",
+      "label": "Espessura da borda (px)",
+      "group": "surface",
+      "default": 0,
+      "min": 0,
+      "max": 12,
+      "step": 1
+    },
+    "borderColor": {
+      "type": "string",
+      "format": "color",
+      "label": "Cor da borda",
+      "group": "surface",
+      "default": "#dbe2ea"
+    },
+    "background": {
+      "type": "string",
+      "format": "color",
+      "label": "Fundo da janela",
+      "group": "surface",
+      "default": "#ffffff"
+    },
+    "backgroundImage": {
+      "type": "string",
+      "format": "image",
+      "label": "Imagem de fundo",
+      "group": "surface",
+      "default": ""
+    },
+    "backgroundPosition": {
+      "type": "string",
+      "label": "Posição da imagem",
+      "group": "surface",
+      "default": "center",
+      "options": [
+        {
+          "value": "center",
+          "label": "Centro"
+        },
+        {
+          "value": "top",
+          "label": "Topo"
+        },
+        {
+          "value": "bottom",
+          "label": "Base"
+        },
+        {
+          "value": "left",
+          "label": "Esquerda"
+        },
+        {
+          "value": "right",
+          "label": "Direita"
+        }
+      ]
+    },
+    "imageOpacity": {
+      "type": "number",
+      "label": "Visibilidade da imagem",
+      "group": "surface",
+      "default": 1,
+      "min": 0,
+      "max": 1,
+      "step": 0.05
+    },
+    "shadow": {
+      "type": "string",
+      "label": "Sombra",
+      "group": "surface",
+      "default": "soft",
+      "options": [
+        {
+          "value": "none",
+          "label": "Sem sombra"
+        },
+        {
+          "value": "soft",
+          "label": "Suave"
+        },
+        {
+          "value": "strong",
+          "label": "Marcante"
+        }
+      ]
+    },
+    "overlayColor": {
+      "type": "string",
+      "format": "color",
+      "label": "Cor do fundo externo",
+      "group": "overlay",
+      "default": "#0f172a"
+    },
+    "overlayOpacity": {
+      "type": "number",
+      "label": "Opacidade do fundo externo",
+      "group": "overlay",
+      "default": 0.65,
+      "min": 0,
+      "max": 1,
+      "step": 0.05
+    },
+    "overlayBlur": {
+      "type": "number",
+      "label": "Desfoque do site (px)",
+      "group": "overlay",
+      "default": 4,
+      "min": 0,
+      "max": 24,
+      "step": 1
+    },
+    "font": {
+      "type": "string",
+      "label": "Família de fonte",
+      "group": "type",
+      "default": "system",
+      "options": [
+        {
+          "value": "system",
+          "label": "Sistema / sans-serif"
+        },
+        {
+          "value": "serif",
+          "label": "Georgia / serif"
+        },
+        {
+          "value": "mono",
+          "label": "Monoespaçada"
+        },
+        {
+          "value": "inherit",
+          "label": "Herdar do site"
+        }
+      ]
+    },
+    "customFont": {
+      "type": "string",
+      "format": "text",
+      "label": "Fonte personalizada já carregada no site (opcional)",
+      "group": "type",
+      "default": ""
+    },
+    "fontSize": {
+      "type": "number",
+      "label": "Tamanho do texto (px)",
+      "group": "type",
+      "default": 16,
+      "min": 12,
+      "max": 36,
+      "step": 1
+    },
+    "headingSize": {
+      "type": "number",
+      "label": "Tamanho dos títulos (px)",
+      "group": "type",
+      "default": 32,
+      "min": 16,
+      "max": 88,
+      "step": 1
+    },
+    "lineHeight": {
+      "type": "number",
+      "label": "Altura da linha",
+      "group": "type",
+      "default": 1.5,
+      "min": 1,
+      "max": 2.4,
+      "step": 0.1
+    },
+    "textColor": {
+      "type": "string",
+      "format": "color",
+      "label": "Cor dos textos",
+      "group": "type",
+      "default": "#172033"
+    },
+    "headingColor": {
+      "type": "string",
+      "format": "color",
+      "label": "Cor dos títulos",
+      "group": "type",
+      "default": "#0f172a"
+    },
+    "textAlign": {
+      "type": "string",
+      "label": "Alinhamento padrão",
+      "group": "type",
+      "default": "left",
+      "options": [
+        {
+          "value": "left",
+          "label": "Esquerda"
+        },
+        {
+          "value": "center",
+          "label": "Centro"
+        },
+        {
+          "value": "right",
+          "label": "Direita"
+        }
+      ]
+    },
+    "buttonBackground": {
+      "type": "string",
+      "format": "color",
+      "label": "Cor do botão",
+      "group": "button",
+      "default": "#2563eb"
+    },
+    "buttonText": {
+      "type": "string",
+      "format": "color",
+      "label": "Cor do texto do botão",
+      "group": "button",
+      "default": "#ffffff"
+    },
+    "buttonHover": {
+      "type": "string",
+      "format": "color",
+      "label": "Cor ao passar o mouse",
+      "group": "button",
+      "default": "#1d4ed8"
+    },
+    "buttonRadius": {
+      "type": "number",
+      "label": "Arredondamento do botão (px)",
+      "group": "button",
+      "default": 12,
+      "min": 0,
+      "max": 100,
+      "step": 1
+    },
+    "buttonPadding": {
+      "type": "number",
+      "label": "Espaçamento do botão (px)",
+      "group": "button",
+      "default": 16,
+      "min": 8,
+      "max": 40,
+      "step": 1
+    },
+    "buttonFontSize": {
+      "type": "number",
+      "label": "Texto do botão (px)",
+      "group": "button",
+      "default": 16,
+      "min": 12,
+      "max": 32,
+      "step": 1
+    },
+    "buttonWidth": {
+      "type": "string",
+      "label": "Largura do botão",
+      "group": "button",
+      "default": "full",
+      "options": [
+        {
+          "value": "full",
+          "label": "Preencher"
+        },
+        {
+          "value": "auto",
+          "label": "Ajustar ao texto"
+        }
+      ]
+    },
+    "buttonEffect": {
+      "type": "string",
+      "label": "Efeito ao passar o mouse",
+      "group": "button",
+      "default": "lift",
+      "options": [
+        {
+          "value": "none",
+          "label": "Nenhum"
+        },
+        {
+          "value": "lift",
+          "label": "Elevar"
+        },
+        {
+          "value": "bright",
+          "label": "Iluminar"
+        }
+      ]
+    },
+    "loadingLabel": {
+      "type": "string",
+      "format": "text",
+      "label": "Texto enquanto o anúncio prepara",
+      "group": "button",
+      "default": "Preparando anúncio…"
+    },
+    "mobileWidthMode": {
+      "type": "string",
+      "label": "Largura no celular",
+      "group": "mobile",
+      "default": "full",
+      "options": [
+        {
+          "value": "full",
+          "label": "Preencher a tela"
+        },
+        {
+          "value": "fixed",
+          "label": "Definir largura máxima"
+        }
+      ]
+    },
+    "mobileWidth": {
+      "type": "number",
+      "label": "Largura máxima (px)",
+      "group": "mobile",
+      "default": 560,
+      "min": 260,
+      "max": 900,
+      "step": 1
+    },
+    "mobileInset": {
+      "type": "number",
+      "label": "Distância das bordas (px)",
+      "group": "mobile",
+      "default": 12,
+      "min": 0,
+      "max": 40,
+      "step": 1
+    },
+    "mobilePadding": {
+      "type": "number",
+      "label": "Espaçamento interno (px)",
+      "group": "mobile",
+      "default": 24,
+      "min": 0,
+      "max": 64,
+      "step": 1
+    },
+    "mobileRadius": {
+      "type": "number",
+      "label": "Arredondamento (px)",
+      "group": "mobile",
+      "default": 20,
+      "min": 0,
+      "max": 80,
+      "step": 1
+    },
+    "mobileFontSize": {
+      "type": "number",
+      "label": "Texto (px)",
+      "group": "mobile",
+      "default": 16,
+      "min": 12,
+      "max": 28,
+      "step": 1
+    },
+    "mobileHeadingSize": {
+      "type": "number",
+      "label": "Títulos (px)",
+      "group": "mobile",
+      "default": 26,
+      "min": 16,
+      "max": 56,
+      "step": 1
+    },
+    "mobilePosition": {
+      "type": "string",
+      "label": "Posição no celular",
+      "group": "mobile",
+      "default": "center",
+      "options": [
+        {
+          "value": "center",
+          "label": "Centro"
+        },
+        {
+          "value": "top",
+          "label": "Topo"
+        },
+        {
+          "value": "bottom",
+          "label": "Rodapé"
+        }
+      ]
+    },
+    "mobileHeightMode": {
+      "type": "string",
+      "label": "Altura no celular",
+      "group": "mobile",
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Ajustar ao conteúdo"
+        },
+        {
+          "value": "fixed",
+          "label": "Definir em pixels"
+        },
+        {
+          "value": "full",
+          "label": "Preencher a tela"
+        }
+      ]
+    },
+    "mobileHeight": {
+      "type": "number",
+      "label": "Altura fixa (px)",
+      "group": "mobile",
+      "default": 520,
+      "min": 160,
+      "max": 1000,
+      "step": 1
+    },
+    "animation": {
+      "type": "string",
+      "label": "Animação de entrada",
+      "group": "motion",
+      "default": "fade",
+      "options": [
+        {
+          "value": "none",
+          "label": "Nenhuma"
+        },
+        {
+          "value": "fade",
+          "label": "Aparecer suavemente"
+        },
+        {
+          "value": "scale",
+          "label": "Aproximar"
+        },
+        {
+          "value": "slide",
+          "label": "Deslizar de baixo"
+        }
+      ]
+    },
+    "duration": {
+      "type": "number",
+      "label": "Duração da animação (ms)",
+      "group": "motion",
+      "default": 240,
+      "min": 0,
+      "max": 1000,
+      "step": 10
+    },
+    "contentWidth": {
+      "type": "number",
+      "label": "Largura máxima do conteúdo (px)",
+      "group": "layout",
+      "default": 720,
+      "min": 280,
+      "max": 1600,
+      "step": 10
+    },
+    "contentAlign": {
+      "type": "string",
+      "label": "Conteúdo dentro da janela",
+      "group": "layout",
+      "default": "top",
+      "options": [
+        {
+          "label": "No topo",
+          "value": "top"
+        },
+        {
+          "label": "No centro",
+          "value": "center"
+        },
+        {
+          "label": "Na base",
+          "value": "bottom"
+        }
+      ]
+    }
+  },
+  "presets": [
+    {
+      "id": "clean",
+      "label": "Claro",
+      "description": "Janela clara, cantos suaves e botão azul.",
+      "values": {}
+    },
+    {
+      "id": "night",
+      "label": "Escuro",
+      "description": "Fundo escuro e destaque em verde.",
+      "values": {
+        "background": "#111827",
+        "textColor": "#d1d5db",
+        "headingColor": "#ffffff",
+        "buttonBackground": "#34d399",
+        "buttonText": "#052e23",
+        "buttonHover": "#10b981",
+        "borderWidth": 1,
+        "borderColor": "#374151",
+        "overlayOpacity": 0.8
+      }
+    },
+    {
+      "id": "editorial",
+      "label": "Editorial",
+      "description": "Tipografia serifada e tons de papel.",
+      "values": {
+        "background": "#fff8ec",
+        "textColor": "#554735",
+        "headingColor": "#352919",
+        "font": "serif",
+        "buttonBackground": "#9a4b2f",
+        "buttonHover": "#783920",
+        "radius": 4,
+        "mobileRadius": 4,
+        "shadow": "soft"
+      }
+    },
+    {
+      "id": "sheet",
+      "label": "Painel inferior",
+      "description": "Painel largo na base da tela.",
+      "values": {
+        "width": 1000,
+        "position": "bottom",
+        "mobilePosition": "bottom",
+        "inset": 16,
+        "mobileInset": 0,
+        "mobileRadius": 20,
+        "animation": "slide",
+        "padding": 40
+      }
+    },
+    {
+      "id": "full",
+      "label": "Tela cheia",
+      "description": "Ocupa a tela sem alterar o fluxo do anúncio.",
+      "values": {
+        "width": 1600,
+        "heightMode": "full",
+        "maxHeight": 100,
+        "inset": 0,
+        "radius": 0,
+        "mobileHeightMode": "full",
+        "mobileInset": 0,
+        "mobileRadius": 0,
+        "widthMode": "full"
+      }
+    }
+  ],
+  "formats": [
+    {
+      "id": "center",
+      "label": "Modal central",
+      "description": "Uma janela no centro do site.",
+      "values": {
+        "widthMode": "fixed",
+        "width": 560,
+        "heightMode": "auto",
+        "minHeight": 0,
+        "maxHeight": 90,
+        "position": "center",
+        "inset": 24,
+        "radius": 24,
+        "mobileWidthMode": "full",
+        "mobileHeightMode": "auto",
+        "mobilePosition": "center",
+        "mobileInset": 12,
+        "mobileRadius": 20,
+        "contentWidth": 720,
+        "contentAlign": "top"
+      }
+    },
+    {
+      "id": "full",
+      "label": "Tela cheia",
+      "description": "Ocupa toda a tela, sem margens.",
+      "values": {
+        "widthMode": "full",
+        "heightMode": "full",
+        "minHeight": 0,
+        "maxHeight": 100,
+        "position": "center",
+        "inset": 0,
+        "radius": 0,
+        "mobileWidthMode": "full",
+        "mobileHeightMode": "full",
+        "mobilePosition": "center",
+        "mobileInset": 0,
+        "mobileRadius": 0,
+        "contentWidth": 720,
+        "contentAlign": "center"
+      }
+    },
+    {
+      "id": "bottom",
+      "label": "Painel inferior",
+      "description": "Uma faixa na base da tela.",
+      "values": {
+        "widthMode": "full",
+        "heightMode": "auto",
+        "minHeight": 0,
+        "maxHeight": 90,
+        "position": "bottom",
+        "inset": 0,
+        "radius": 24,
+        "mobileWidthMode": "full",
+        "mobileHeightMode": "auto",
+        "mobilePosition": "bottom",
+        "mobileInset": 0,
+        "mobileRadius": 20,
+        "contentWidth": 720,
+        "contentAlign": "top"
+      }
+    },
+    {
+      "id": "side",
+      "label": "Painel lateral",
+      "description": "Uma janela alta à direita.",
+      "values": {
+        "widthMode": "fixed",
+        "width": 440,
+        "heightMode": "full",
+        "minHeight": 0,
+        "maxHeight": 100,
+        "position": "right",
+        "inset": 0,
+        "radius": 0,
+        "mobileWidthMode": "full",
+        "mobileHeightMode": "auto",
+        "mobilePosition": "bottom",
+        "mobileInset": 0,
+        "mobileRadius": 20,
+        "contentWidth": 720,
+        "contentAlign": "center"
+      }
+    }
+  ],
+  "palettes": [
+    {
+      "id": "clean",
+      "label": "Claro",
+      "colors": [
+        "#ffffff",
+        "#172033",
+        "#2563eb"
+      ],
+      "values": {
+        "background": "#ffffff",
+        "textColor": "#172033",
+        "headingColor": "#0f172a",
+        "buttonBackground": "#2563eb",
+        "buttonText": "#ffffff",
+        "buttonHover": "#1d4ed8",
+        "borderColor": "#dbe2ea",
+        "overlayColor": "#0f172a"
+      }
+    },
+    {
+      "id": "night",
+      "label": "Escuro",
+      "colors": [
+        "#111827",
+        "#d1d5db",
+        "#34d399"
+      ],
+      "values": {
+        "background": "#111827",
+        "textColor": "#d1d5db",
+        "headingColor": "#ffffff",
+        "buttonBackground": "#34d399",
+        "buttonText": "#052e23",
+        "buttonHover": "#10b981",
+        "borderColor": "#374151",
+        "overlayColor": "#030712"
+      }
+    },
+    {
+      "id": "paper",
+      "label": "Papel",
+      "colors": [
+        "#fff8ec",
+        "#554735",
+        "#9a4b2f"
+      ],
+      "values": {
+        "background": "#fff8ec",
+        "textColor": "#554735",
+        "headingColor": "#352919",
+        "buttonBackground": "#9a4b2f",
+        "buttonText": "#ffffff",
+        "buttonHover": "#783920",
+        "borderColor": "#e5d9c7",
+        "overlayColor": "#352919"
+      }
+    },
+    {
+      "id": "violet",
+      "label": "Violeta",
+      "colors": [
+        "#f5f3ff",
+        "#3b286b",
+        "#7c3aed"
+      ],
+      "values": {
+        "background": "#f5f3ff",
+        "textColor": "#4c3c70",
+        "headingColor": "#2e1065",
+        "buttonBackground": "#7c3aed",
+        "buttonText": "#ffffff",
+        "buttonHover": "#6d28d9",
+        "borderColor": "#ddd6fe",
+        "overlayColor": "#1e1035"
+      }
+    }
+  ]
+}

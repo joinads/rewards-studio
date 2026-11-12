@@ -1,0 +1,57 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "joinads/reward-countdown",
+  "version": "0.2.0",
+  "title": "Contagem regressiva",
+  "category": "design",
+  "icon": "clock",
+  "description": "Prazo da campanha ou por visitante. Não altera o anúncio.",
+  "attributes": {
+    "label": {
+      "type": "string",
+      "default": "Prazo da campanha"
+    },
+    "mode": {
+      "type": "string",
+      "default": "deadline"
+    },
+    "deadline": {
+      "type": "string",
+      "default": ""
+    },
+    "seconds": {
+      "type": "number",
+      "default": 900
+    },
+    "expiredLabel": {
+      "type": "string",
+      "default": "O prazo informado terminou."
+    },
+    "expiry": {
+      "type": "string",
+      "default": "message"
+    },
+    "timerId": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "supports": {
+    "html": false,
+    "color": {
+      "text": true,
+      "background": true
+    },
+    "spacing": {
+      "margin": true,
+      "padding": true
+    },
+    "typography": {
+      "fontSize": true
+    }
+  },
+  "editorScript": "ja-reward-action-editor",
+  "render": "file:./render.php",
+  "style": "ja-reward-studio-style"
+}

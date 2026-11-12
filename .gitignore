@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.DS_Store
+
+.playwright-cli/
+output/
+
+# Internal Core investigation and integration material remains local.
+integration/
+docs/analise-core.md
+__pycache__/
+*.pyc
+.env
+.env.*

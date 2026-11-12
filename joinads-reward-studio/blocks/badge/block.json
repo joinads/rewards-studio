@@ -1,0 +1,37 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "joinads/reward-badge",
+  "version": "0.2.0",
+  "title": "Aviso e destaque",
+  "category": "design",
+  "icon": "megaphone",
+  "description": "Selo editável de prazo, benefício ou informação da campanha.",
+  "attributes": {
+    "label": {
+      "type": "string",
+      "default": "Conteúdo exclusivo"
+    },
+    "icon": {
+      "type": "string",
+      "default": "gift"
+    }
+  },
+  "supports": {
+    "html": false,
+    "color": {
+      "text": true,
+      "background": true
+    },
+    "spacing": {
+      "margin": true,
+      "padding": true
+    },
+    "typography": {
+      "fontSize": true
+    }
+  },
+  "editorScript": "ja-reward-action-editor",
+  "render": "file:./render.php",
+  "style": "ja-reward-studio-style"
+}
