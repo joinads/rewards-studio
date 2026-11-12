@@ -9,7 +9,7 @@
     const design = window.JoinAdsRewardDesign;
     const metaKey = '_ja_appearance';
     const mobileKeys = { widthMode:'mobileWidthMode', width:'mobileWidth', heightMode:'mobileHeightMode', height:'mobileHeight', inset:'mobileInset', padding:'mobilePadding', radius:'mobileRadius', position:'mobilePosition', fontSize:'mobileFontSize', headingSize:'mobileHeadingSize' };
-    const blockNames = { 'core/heading':'Título', 'core/paragraph':'Texto', 'core/image':'Imagem', 'joinads/reward-action':'Botão', 'joinads/reward-countdown':'Contagem regressiva', 'joinads/reward-badge':'Aviso e destaque' };
+    const blockNames = { 'core/heading':'Título', 'core/paragraph':'Texto', 'core/image':'Imagem', 'joinads/reward-action':'Botão', 'joinads/reward-countdown':'Contagem regressiva', 'joinads/reward-badge':'Aviso e destaque', 'joinads/reward-audience':'Audiência simulada' };
     function flatten(blocks) { return blocks.flatMap(block => [block, ...flatten(block.innerBlocks || [])]); }
     function plain(html) { const template=document.createElement('template'); template.innerHTML=html || ''; return template.content.textContent; }
     function formatIcon(id) { return el('span', { className:'ja-format-icon is-' + id, 'aria-hidden':true }, el('span', {className:'ja-format-window'}, el('i'),el('i'),el('b'))); }
@@ -83,7 +83,7 @@
         function patchBlock(block,values){blockActions.updateBlockAttributes(block.clientId,values);}
         function selectPreview(index){if(Number.isInteger(index) && editable[index]){setSelected(editable[index].clientId);setTab('content');}}
         function addBlock(name){
-            const attrs=name==='joinads/reward-countdown'?{mode:'duration',seconds:900}:{};
+            const attrs=name==='joinads/reward-countdown'?{mode:'duration',seconds:900,layout:'cards',urgentSeconds:60}:{};
             const block=wp.blocks.createBlock(name,attrs);
             blockActions.insertBlocks(block,state.blocks.length);
             setSelected(block.clientId);setTab('content');
@@ -132,6 +132,7 @@
                     el(SelectControl,{key:'expiry',label:'Quando o prazo terminar',value:a.expiry,options:[{label:'Mostrar mensagem',value:'message'},{label:'Ocultar o contador',value:'hide'}],onChange:expiry=>patch({expiry})}),
                     a.expiry!=='hide'?el(TextControl,{key:'expiredLabel',label:'Mensagem final',value:a.expiredLabel,onChange:expiredLabel=>patch({expiredLabel})}):null);
             }
+            if(window.JoinAdsRewardTriggerControls)controls.push(el('div',{key:'trigger-settings'},window.JoinAdsRewardTriggerControls.controls(active.name,a,patch)));
             return el('div',{className:'ja-content-editor'},el('h3',null,'Editar '+blockNames[active.name].toLowerCase()),controls,
                 el(Button,{variant:'tertiary',onClick:()=>{blockActions.selectBlock(active.clientId);setOpen(false);}},'Abrir este bloco no conteúdo'));
         }

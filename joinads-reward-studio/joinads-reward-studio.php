@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Rewards Studio by CORE ( JOINADS )
  * Description: Faces visuais para rewards JoinAds, com editor de blocos e personalização por campanha.
- * Version: 0.3.2
+ * Version: 0.4.0
  * Requires at least: 6.6
  * Requires PHP: 7.4
  * License: GPL-2.0-or-later
@@ -21,7 +21,7 @@ require_once __DIR__ . '/includes/patterns.php';
 
 final class JoinAds_Reward_Studio {
     const TYPE = 'ja_reward_face';
-    const VERSION = '0.3.2';
+    const VERSION = '0.4.0';
     private static $render_cache = array();
 
     public static function boot() {
@@ -52,8 +52,9 @@ final class JoinAds_Reward_Studio {
             ))),
         ));
         wp_register_style('ja-reward-studio-style', plugins_url('assets/frontend.css', __FILE__), array(), self::VERSION);
-        wp_register_script('ja-reward-action-editor', plugins_url('assets/editor.js', __FILE__), array('wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components'), self::VERSION, true);
-        foreach (array('action', 'countdown', 'badge') as $block) register_block_type(__DIR__ . '/blocks/' . $block);
+        wp_register_script('ja-reward-trigger-controls', plugins_url('assets/trigger-controls.js', __FILE__), array('wp-element', 'wp-components'), self::VERSION, true);
+        wp_register_script('ja-reward-action-editor', plugins_url('assets/editor.js', __FILE__), array('wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'ja-reward-trigger-controls'), self::VERSION, true);
+        foreach (array('action', 'countdown', 'badge', 'audience') as $block) register_block_type(__DIR__ . '/blocks/' . $block);
         JoinAds_Reward_Appearance::register(self::TYPE);
         joinads_reward_register_patterns();
     }
@@ -73,7 +74,7 @@ final class JoinAds_Reward_Studio {
         wp_enqueue_script('ja-reward-design');
         wp_enqueue_style('ja-reward-studio-style');
         wp_enqueue_style('ja-reward-studio-editor', plugins_url('assets/editor.css', __FILE__), array(), self::VERSION);
-        wp_enqueue_script('ja-reward-studio-sidebar', plugins_url('assets/sidebar.js', __FILE__), array('ja-reward-design', 'wp-plugins', 'wp-editor', 'wp-edit-post', 'wp-data', 'wp-element', 'wp-components', 'wp-block-editor'), self::VERSION, true);
+        wp_enqueue_script('ja-reward-studio-sidebar', plugins_url('assets/sidebar.js', __FILE__), array('ja-reward-design', 'ja-reward-trigger-controls', 'wp-plugins', 'wp-editor', 'wp-edit-post', 'wp-data', 'wp-element', 'wp-components', 'wp-block-editor'), self::VERSION, true);
         wp_add_inline_script('ja-reward-studio-sidebar', 'window.JoinAdsRewardStudio=' . wp_json_encode(array(
             'postId' => $post->ID, 'nonce' => wp_create_nonce('ja_preview_' . $post->ID),
             'previewUrl' => admin_url('admin-post.php'),
@@ -134,7 +135,7 @@ final class JoinAds_Reward_Studio {
         $interactive = !empty($request['editor_preview']);
         $index = 0;
         $mark = function ($html, $block) use (&$index) {
-            if (!in_array($block['blockName'] ?? '', array('core/heading', 'core/paragraph', 'core/image', 'joinads/reward-action', 'joinads/reward-countdown', 'joinads/reward-badge'), true)) return $html;
+            if (!in_array($block['blockName'] ?? '', array('core/heading', 'core/paragraph', 'core/image', 'joinads/reward-action', 'joinads/reward-countdown', 'joinads/reward-badge', 'joinads/reward-audience'), true)) return $html;
             $number = $index++;
             return preg_replace('/^(\s*<[a-zA-Z][a-zA-Z0-9:-]*)/', '$1 data-ja-edit-index="' . $number . '"', $html, 1);
         };

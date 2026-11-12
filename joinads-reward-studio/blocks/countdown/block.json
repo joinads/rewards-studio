@@ -2,7 +2,7 @@
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 3,
   "name": "joinads/reward-countdown",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "title": "Contagem regressiva",
   "category": "design",
   "icon": "clock",
@@ -35,6 +35,62 @@
     "timerId": {
       "type": "string",
       "default": ""
+    },
+    "layout": {
+      "type": "string",
+      "default": "classic"
+    },
+    "digitSize": {
+      "type": "number",
+      "default": 34
+    },
+    "clockRadius": {
+      "type": "number",
+      "default": 12
+    },
+    "accentColor": {
+      "type": "string",
+      "default": "#ef4444"
+    },
+    "unitBackground": {
+      "type": "string",
+      "default": "#ffffff"
+    },
+    "unitColor": {
+      "type": "string",
+      "default": "#172033"
+    },
+    "daysLabel": {
+      "type": "string",
+      "default": "Dias"
+    },
+    "hoursLabel": {
+      "type": "string",
+      "default": "Horas"
+    },
+    "minutesLabel": {
+      "type": "string",
+      "default": "Min"
+    },
+    "secondsLabel": {
+      "type": "string",
+      "default": "Seg"
+    },
+    "showDays": {
+      "type": "boolean",
+      "default": false
+    },
+    "urgentSeconds": {
+      "type": "number",
+      "default": 0
+    },
+    "urgentLabel": {
+      "type": "string",
+      "default": "O prazo está terminando"
+    },
+    "urgentPulse": {
+      "type": "boolean",
+      "default": false
     }
   },
   "supports": {

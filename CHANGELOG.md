@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0 — 2026-11-12
+
+- Contagem de audiência simulada com texto, limites, valor inicial, variação e intervalo editáveis.
+- Novos layouts do contador: digital, blocos separados, compacto e faixa de destaque.
+- Tamanho dos números, cores, cantos, nomes das unidades e destaque nos segundos finais.
+- Pulsação suave ou forte do botão, com velocidade configurável e apenas quando o anúncio está pronto.
+- Os novos controles estão disponíveis no estúdio visual e no editor de blocos.
+- Timers pausam a variação de audiência em abas ocultas e são limpos ao fechar o reward; efeitos respeitam movimento reduzido.
+
 ## 0.3.2 — 2026-11-12
 
 - Nome oficial: Rewards Studio by CORE ( JOINADS ).

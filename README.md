@@ -35,7 +35,19 @@ Use `{{person}}` e `{{type}}` nos textos. A URL `?person=Maria&type=viagens` per
 
 O bloco **Contagem regressiva** aceita uma data/hora final, salva em UTC, ou duração de 1 minuto a 24 horas por visitante. A duração persiste em `localStorage` quando disponível; limpar os dados do navegador reinicia esse prazo. Sem armazenamento disponível, vale apenas a visita atual.
 
-Ao terminar, mostra a mensagem configurada ou oculta somente o contador. Não bloqueia nem libera conteúdo e não altera a validade comercial da oferta no Core. O bloco **Aviso e destaque** permite comunicar informações reais da campanha. Nenhum bloco inventa estoque, visitantes ou prova social, e nenhum campo aceita JavaScript arbitrário.
+Ao terminar, mostra a mensagem configurada ou oculta somente o contador. Não bloqueia nem libera conteúdo e não altera a validade comercial da oferta no Core. O bloco **Aviso e destaque** permite comunicar as informações da campanha. Nenhum campo aceita JavaScript arbitrário.
+
+O relógio tem quatro layouts: **Digital**, **Blocos separados**, **Compacto** e **Faixa de destaque**. No estúdio, selecione o contador e ajuste o tamanho dos números, cores, cantos, nomes das unidades e o destaque nos últimos segundos. O destaque é opcional; contadores existentes mantêm sua apresentação até você escolher os novos ajustes.
+
+### Contagem de audiência simulada
+
+Em **Conteúdo → + Audiência simulada**, adicione um texto como `{count} watching now` ou `{count} pessoas acompanhando`. Configure valor inicial, mínimo, máximo, variação máxima por mudança e intervalo. O número sobe e desce dentro desses limites. Há layouts em linha, selo e cartão, além de cor e indicador de atividade.
+
+Essa contagem é uma simulação visual local, não uma medição de visitantes reais. Ela não faz consultas de audiência à rede. A variação pausa em abas ocultas e é encerrada junto com a face.
+
+### Botão pulsando
+
+Selecione o botão de assistir anúncio e escolha **Pulsação do botão → Suave** ou **Mais forte**. Ajuste a velocidade entre 0,8 e 5 segundos. O efeito só aparece com o botão habilitado, não se aplica à ação de fechar e respeita a preferência de movimento reduzido do visitante. A animação não altera a prontidão, o clique, o rebid ou a recompensa.
 
 ## Atualizações pelo GitHub
 
@@ -69,6 +81,7 @@ Para diagnóstico no console, consulte `window.JoinAdsRewardStudioStatus`. `stat
 npm ci --ignore-scripts
 npm test
 npm run test:updates
+npm run test:render
 npm run lint
 npm run package
 ```
@@ -81,6 +94,7 @@ npm run release:version -- 0.3.3
 npm run version:check
 npm test
 npm run test:updates
+npm run test:render
 npm run lint
 git add VERSION CHANGELOG.md package.json package-lock.json joinads-reward-studio
 git commit -m "release: 0.3.3"

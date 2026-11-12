@@ -1,7 +1,7 @@
 === Rewards Studio by CORE ( JOINADS ) ===
 Requires at least: 6.6
 Requires PHP: 7.4
-Stable tag: 0.3.2
+Stable tag: 0.4.0
 License: GPLv2 or later
 
 Editor de faces para rewards JoinAds. Usa os botões e o fluxo originais do Core.
@@ -28,12 +28,21 @@ Aviso e destaque permite textos e ícones da campanha. Não gera estoque, visita
 == Escopo ==
 Personaliza a oferta normal e os bloqueios modal/drawer. Quiz, captura e entrega continuam na interface nativa. Rebid, prontidão, cooldown e concessão seguem no Core. Alterações visuais são retiradas antes de encaminhar o clique ao botão nativo.
 
+== Novos gatilhos visuais ==
+Contagem de audiência (simulada): texto com {count}, valor inicial, mínimo, máximo, variação e intervalo editáveis. Layout em linha, selo ou cartão. Os números não representam visitantes reais medidos.
+
+Contagem regressiva: layouts digital, blocos separados, compacto e faixa; tamanho, cores, cantos e rótulos editáveis; mensagem e destaque opcionais nos últimos segundos.
+
+Botão de anúncio: pulsação suave ou forte e velocidade entre 0,8 e 5 segundos. Só pulsa quando o anúncio está pronto. Não muda a ação do botão nem a espera, e respeita movimento reduzido.
+
 == Atualizações ==
 Releases oficiais: https://github.com/joinads/rewards-studio/releases
 Download: https://github.com/joinads/rewards-studio/releases/latest/download/rewards-studio.zip
 A partir da versão 0.3.2, o plugin ativo consulta as releases públicas pelo sistema nativo de atualizações do WordPress. Use Verificar atualizações na lista de plugins para antecipar a consulta. Para instalação automática, ative Ativar atualizações automáticas no WordPress. Nenhum token do GitHub é necessário no site. Quem está na versão 0.3.1 ou anterior precisa instalar a 0.3.2 manualmente uma vez.
 
 == Changelog ==
+= 0.4.0 =
+Contagem de audiência simulada, quatro layouts para o relógio, opções de destaque no final do prazo e pulsação do botão, com os mesmos controles no estúdio e nos blocos.
 = 0.3.2 =
 Nome oficial Rewards Studio by CORE ( JOINADS ), atualizador via releases públicas do GitHub e distribuição automática por versão.
 = 0.3.1 =

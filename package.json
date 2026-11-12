@@ -7,10 +7,11 @@
     "package": "python3 scripts/package.py",
     "test:updates": "php tests/updater.php",
     "version:check": "python3 scripts/version.py --check",
-    "release:version": "python3 scripts/version.py"
+    "release:version": "python3 scripts/version.py",
+    "test:render": "php tests/triggers-render.php"
   },
   "devDependencies": {
     "jsdom": "26.1.0"
   },
-  "version": "0.3.2"
+  "version": "0.4.0"
 }

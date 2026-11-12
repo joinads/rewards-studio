@@ -1,0 +1,65 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "joinads/reward-audience",
+  "version": "0.4.0",
+  "title": "Contagem de audiência (simulada)",
+  "category": "design",
+  "icon": "groups",
+  "description": "Contagem visual simulada com texto, intervalo e variação configuráveis. Não mede visitantes reais.",
+  "attributes": {
+    "label": {
+      "type": "string",
+      "default": "{count} watching now"
+    },
+    "initial": {
+      "type": "number",
+      "default": 328
+    },
+    "minimum": {
+      "type": "number",
+      "default": 300
+    },
+    "maximum": {
+      "type": "number",
+      "default": 360
+    },
+    "step": {
+      "type": "number",
+      "default": 5
+    },
+    "interval": {
+      "type": "number",
+      "default": 4000
+    },
+    "layout": {
+      "type": "string",
+      "default": "badge"
+    },
+    "indicator": {
+      "type": "boolean",
+      "default": true
+    },
+    "accentColor": {
+      "type": "string",
+      "default": "#16a34a"
+    }
+  },
+  "supports": {
+    "html": false,
+    "color": {
+      "text": true,
+      "background": true
+    },
+    "spacing": {
+      "margin": true,
+      "padding": true
+    },
+    "typography": {
+      "fontSize": true
+    }
+  },
+  "editorScript": "ja-reward-action-editor",
+  "render": "file:./render.php",
+  "style": "ja-reward-studio-style"
+}
