@@ -25,6 +25,8 @@ Clique em **Abrir estúdio visual** nas configurações da face ou abra **Person
 
 **Para tela cheia:** Estúdio visual → Formato → Tela cheia. O conteúdo fica centralizado com largura de leitura ajustável. Confira **Desktop** e **Celular**, clique em **Concluído** e salve a face no WordPress. A prévia não publica nem solicita anúncios.
 
+**Para um elemento à esquerda e outro à direita:** em **Conteúdo**, selecione “Conteúdo exclusivo” na lista; em **Colocar lado a lado**, escolha a audiência em **Elemento à direita** e clique no botão. Em **Layout da linha**, mantenha **Pontas opostas**. Você também pode centralizar os elementos, usar colunas iguais, ajustar o espaço, inverter a ordem e escolher como a linha se adapta ao celular. **Separar elementos** volta a exibi-los em sequência. O agrupamento usa uma Linha nativa do WordPress e preserva textos, estilos, contadores e ações; os identificadores internos do editor podem ser renovados. Confira Desktop e Celular e salve a face.
+
 Inclua ao menos um bloco **Ação do reward → Assistir anúncio**. O botão acompanha o estado de prontidão do botão original e encaminha o clique a ele. Fechamento também obedece ao Core.
 
 Em **Mais → Avançado**, use `.ja-face` para o conteúdo, `.ja-face h2` para títulos, `.ja-face-button` para botões, `.ja-designed-modal` para a janela e `.ja-designed-overlay` para o fundo. O CSS aceita seletores completos, pseudoelementos, `@media`, `@supports` e `@keyframes`; regras aninhadas, importações e outras regras globais não são aplicadas. Use `!important` para substituir propriedades fixas da janela. O limite é de 20.000 caracteres. Erros aparecem no painel e desativam o CSS adicional na prévia. Salve a face no WordPress para publicar; o CSS acompanha as revisões. As regras ficam limitadas à instância do reward e são removidas antes da entrega nativa.
@@ -32,6 +34,10 @@ Em **Mais → Avançado**, use `.ja-face` para o conteúdo, `.ja-face h2` para t
 ### Nome e campanha
 
 Use `{{person}}` e `{{type}}` nos textos. A URL `?person=Maria&type=viagens` personaliza a face no navegador, inclusive com cache de página. Os valores são limitados a 160 caracteres e entram apenas como texto, sem interpolação em HTML, URLs, estilos ou scripts. Há valores padrão por face.
+
+`person` também aceita Base64 UTF-8: `?person=Sm9zw6k%3D` exibe **José**. Aceita os alfabetos comum e de URL (`-`/`_`), com ou sem `=` no final; prefira montar a query com `URLSearchParams` ou `encodeURIComponent`. Nomes em texto normal continuam funcionando. Se a decodificação falhar, o texto original é usado; parâmetros vazios usam o nome padrão da face. O limite de 160 caracteres é aplicado depois da decodificação. `type` continua sendo lido literalmente.
+
+Use `{{model}}` para um conteúdo opcional livre: `?person=Sm9zw6k%3D&type=viagens&model=Oferta%20especial` preenche o nome com **José** e o model com **Oferta especial**. O model aceita até 1.000 caracteres, entra apenas como texto e não participa da seleção da campanha. Se estiver ausente ou vazio, usa o valor definido em **Conteúdo quando ?model= estiver vazio**, na caixa de vínculo com o Core; sem um valor padrão, `{{model}}` fica vazio. Teste os três parâmetros em **Testar nome, campanha e model** na prévia.
 
 ### Urgência e contadores
 

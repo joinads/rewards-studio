@@ -5,7 +5,21 @@
     const handledNative = new WeakSet();
     const status = window.JoinAdsRewardStudioStatus = { state: 'waiting', integration: null, reason: 'awaiting-reward' };
     const report = (state, reason, extra = {}) => Object.assign(status, { state, reason }, extra);
-    const textParam = (params, key, fallback) => (params.get(key) || '').replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 160) || fallback;
+    const cleanText = (value, limit = 160) => value.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, limit);
+    function personParam(params, fallback) {
+        const raw = params.get('person') || '';
+        // URLSearchParams reads a literal + as a space. Accept both Base64 alphabets.
+        const encoded = raw.replace(/ /g, '+').replace(/-/g, '+').replace(/_/g, '/');
+        if (encoded.length <= 2048 && encoded.length % 4 !== 1 && /^[A-Za-z0-9+/]+={0,2}$/.test(encoded)) {
+            try {
+                const bytes = atob(encoded.padEnd(Math.ceil(encoded.length / 4) * 4, '='));
+                const decoded = decodeURIComponent(Array.from(bytes, byte => '%' + byte.charCodeAt(0).toString(16).padStart(2, '0')).join(''));
+                if (decoded.trim() && !/[\u0000-\u001f\u007f]/.test(decoded)) return cleanText(decoded) || fallback;
+            } catch (_) { /* Plain names and malformed encodings keep their original text. */ }
+        }
+        return cleanText(raw) || fallback;
+    }
+    const textParam = (params, key, fallback, limit = 160) => cleanText(params.get(key) || '', limit) || fallback;
 
     function mount(detail) {
         const { root, button, close, rewardId, version } = detail || {};
@@ -19,13 +33,14 @@
         face.className = 'ja-face';
         face.appendChild(template.content.cloneNode(true));
         const values = {
-            person: textParam(params, 'person', template.dataset.personFallback || 'Visitante'),
-            type: textParam(params, 'type', template.dataset.typeFallback || 'seu interesse')
+            person: personParam(params, template.dataset.personFallback || 'Visitante'),
+            type: textParam(params, 'type', template.dataset.typeFallback || 'seu interesse'),
+            model: textParam(params, 'model', template.dataset.modelFallback || '', 1000)
         };
         // Only text nodes: query parameters can never become markup, URLs, CSS or event handlers.
         const walker = document.createTreeWalker(face, NodeFilter.SHOW_TEXT);
         let node;
-        while ((node = walker.nextNode())) node.nodeValue = node.nodeValue.replace(/\{\{\s*(person|type)\s*\}\}/g, (_, key) => values[key]);
+        while ((node = walker.nextNode())) node.nodeValue = node.nodeValue.replace(/\{\{\s*(person|type|model)\s*\}\}/g, (_, key) => values[key]);
         const watches = Array.from(face.querySelectorAll('[data-ja-action="watch"]'));
         if (!watches.length) return; // Keep the original if the authored face cannot start the reward.
         const closers = Array.from(face.querySelectorAll('[data-ja-action="close"]'));

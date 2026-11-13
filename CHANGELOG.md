@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 — 2026-11-13
+
+- Novo controle Conteúdo → Colocar lado a lado para organizar dois elementos em uma linha, inclusive quando estavam em grupos diferentes.
+- Distribuição nas pontas, à esquerda, no centro ou à direita; colunas iguais, alinhamento vertical e espaçamento ajustável.
+- No celular: quebra automática, empilhamento ou manutenção da linha. Permite inverter a ordem e separar os elementos novamente.
+- Usa o bloco Grupo/Linha nativo do WordPress, preserva os atributos e respeita os bloqueios do editor.
+- O parâmetro person agora aceita Base64 comum ou de URL, com UTF-8, com ou sem padding, mantendo compatibilidade com nomes em texto normal.
+- A decodificação acontece antes do limite de 160 caracteres; o valor continua entrando somente como texto e não muda a seleção por type nem o fluxo do Core.
+- Novo parâmetro opcional model para preencher {{model}} com até 1.000 caracteres de texto, com campo de teste na prévia e valor padrão opcional por face.
+
 ## 0.5.0 — 2026-11-13
 
 - Menu do WordPress renomeado para Reward Studio, preservando as faces existentes.

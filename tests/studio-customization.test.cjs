@@ -5,7 +5,7 @@ const fs = require('node:fs');
 function setup() {
     const dom = new JSDOM('<body><h2 id="outside">Site</h2><div class="reward-modal-backdrop"><div id="modal"><section><h2 id="native">Core</h2><button id="native-button" disabled>Core</button></section><div class="ja-face"><h2 id="title">Face</h2><button class="ja-face-button">Assistir</button></div></div></div><div class="ja-face" id="other"><h2>Outra face</h2></div></body>', {runScripts:'outside-only'});
     const w = dom.window;
-    for (const file of ['custom-css','studio-order']) w.eval(fs.readFileSync('joinads-reward-studio/assets/'+file+'.js','utf8'));
+    for (const file of ['custom-css','studio-order','studio-layout']) w.eval(fs.readFileSync('joinads-reward-studio/assets/'+file+'.js','utf8'));
     return {w,doc:w.document,css:w.JoinAdsRewardCustomCSS,dispose:()=>w.close()};
 }
 test('CSS cannot style the publisher, another face, native controls or escaped siblings',()=>{
@@ -59,5 +59,23 @@ test('reordering moves the existing blocks without flattening groups or losing s
     assert.equal(order.destination(blocks,'watch','text',true).index,2);
     assert.equal(order.destination(blocks,'group','watch',false),null);
     assert.equal(order.destination(blocks,'watch','watch',true),null);
+    c.dispose();
+});
+test('row grouping keeps the selected left/right elements, existing IDs, unrelated blocks and visual settings',()=>{
+    const c=setup(),layout=c.w.JoinAdsRewardStudioLayout;
+    const left={clientId:'exclusive',name:'core/paragraph',attributes:{content:'CONTEÚDO EXCLUSIVO',style:{color:{text:'#123456'}}}},right={clientId:'audience',name:'joinads/reward-audience',attributes:{label:'{count} agora',initial:328}},watch={clientId:'watch',name:'joinads/reward-action',attributes:{action:'watch'}};
+    const group={clientId:'group',name:'core/group',attributes:{className:'keep-me'},innerBlocks:[left,watch]},blocks=[group,right];
+    const plan=layout.groupPlan(blocks,'exclusive','audience');
+    assert.equal(plan.rootClientId,'group');assert.equal(plan.partnerRootClientId,'');
+    assert.equal(plan.innerBlocks[0],left);assert.equal(plan.innerBlocks[1],right);
+    assert.equal(plan.attributes.layout.justifyContent,'space-between');assert.equal(group.innerBlocks[1],watch);
+    assert.equal(left.attributes.style.color.text,'#123456');assert.equal(right.attributes.initial,328);
+    const initial={...plan.attributes,className:plan.attributes.className+' user-style',style:{spacing:{blockGap:'var:preset|spacing|20',padding:{top:'8px'}},color:{background:'#fff'}}};
+    const stacked=layout.update(initial,{mobile:'stack',sizing:'equal',justify:'right'});
+    assert.ok(stacked.className.includes('user-style'));assert.ok(stacked.className.includes('ja-row-mobile-stack'));assert.ok(stacked.className.includes('ja-row-equal'));
+    assert.equal(stacked.style.spacing.blockGap,'var:preset|spacing|20');
+    const spaced=layout.update(stacked,{gap:0});assert.equal(spaced.style.spacing.blockGap,'0px');assert.equal(spaced.style.spacing.padding.top,'8px');assert.equal(spaced.style.color.background,'#fff');
+    assert.equal(layout.groupPlan(blocks,'group','exclusive'),null);
+    assert.equal(layout.groupPlan(blocks,'exclusive','exclusive'),null);
     c.dispose();
 });

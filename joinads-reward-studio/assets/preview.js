@@ -3,6 +3,7 @@
     const url = new URL(location.href);
     if (data.person) url.searchParams.set('person', data.person); else url.searchParams.delete('person');
     if (data.type) url.searchParams.set('type', data.type); else url.searchParams.delete('type');
+    if (data.model) url.searchParams.set('model', data.model); else url.searchParams.delete('model');
     history.replaceState(null, '', url);
     const root = document.querySelector('.preview-card');
     const button = document.getElementById('native-watch');

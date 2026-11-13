@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Rewards Studio by CORE ( JOINADS )
  * Description: Faces visuais para rewards JoinAds, com editor de blocos e personalização por campanha.
- * Version: 0.5.0
+ * Version: 0.6.0
  * Requires at least: 6.6
  * Requires PHP: 7.4
  * License: GPL-2.0-or-later
@@ -22,7 +22,7 @@ require_once __DIR__ . '/includes/patterns.php';
 
 final class JoinAds_Reward_Studio {
     const TYPE = 'ja_reward_face';
-    const VERSION = '0.5.0';
+    const VERSION = '0.6.0';
     private static $render_cache = array();
 
     public static function boot() {
@@ -78,7 +78,8 @@ final class JoinAds_Reward_Studio {
         wp_enqueue_style('ja-reward-studio-style');
         wp_enqueue_style('ja-reward-studio-editor', plugins_url('assets/editor.css', __FILE__), array(), self::VERSION);
         wp_register_script('ja-reward-studio-order', plugins_url('assets/studio-order.js', __FILE__), array(), self::VERSION, true);
-        wp_enqueue_script('ja-reward-studio-sidebar', plugins_url('assets/sidebar.js', __FILE__), array('ja-reward-design', 'ja-reward-studio-order', 'ja-reward-trigger-controls', 'wp-plugins', 'wp-editor', 'wp-edit-post', 'wp-data', 'wp-element', 'wp-components', 'wp-block-editor'), self::VERSION, true);
+        wp_register_script('ja-reward-studio-layout', plugins_url('assets/studio-layout.js', __FILE__), array('ja-reward-studio-order'), self::VERSION, true);
+        wp_enqueue_script('ja-reward-studio-sidebar', plugins_url('assets/sidebar.js', __FILE__), array('ja-reward-design', 'ja-reward-studio-layout', 'ja-reward-trigger-controls', 'wp-plugins', 'wp-editor', 'wp-edit-post', 'wp-data', 'wp-element', 'wp-components', 'wp-block-editor'), self::VERSION, true);
         wp_add_inline_script('ja-reward-studio-sidebar', 'window.JoinAdsRewardStudio=' . wp_json_encode(array(
             'postId' => $post->ID, 'nonce' => wp_create_nonce('ja_preview_' . $post->ID),
             'previewUrl' => admin_url('admin-post.php'),
@@ -91,20 +92,20 @@ final class JoinAds_Reward_Studio {
 
     public static function box($post) {
         wp_nonce_field('ja_reward_save', 'ja_reward_nonce');
-        $fields = array('reward_id' => 'Public ID do reward (ULID)', 'campaign_type' => 'Campanha: valor exato de ?type= (vazio = todas)', 'person_fallback' => 'Nome quando ?person= estiver vazio', 'type_fallback' => 'Tipo quando ?type= estiver vazio');
+        $fields = array('reward_id' => 'Public ID do reward (ULID)', 'campaign_type' => 'Campanha: valor exato de ?type= (vazio = todas)', 'person_fallback' => 'Nome quando ?person= estiver vazio', 'type_fallback' => 'Tipo quando ?type= estiver vazio', 'model_fallback' => 'Conteúdo quando ?model= estiver vazio (opcional)');
         foreach ($fields as $key => $label) {
-            printf('<p><label for="ja-%1$s">%2$s</label><input class="widefat" id="ja-%1$s" name="ja_%1$s" value="%3$s" maxlength="160"></p>', esc_attr($key), esc_html($label), esc_attr(get_post_meta($post->ID, '_ja_' . $key, true)));
+            printf('<p><label for="ja-%1$s">%2$s</label><input class="widefat" id="ja-%1$s" name="ja_%1$s" value="%3$s" maxlength="%4$d"></p>', esc_attr($key), esc_html($label), esc_attr(get_post_meta($post->ID, '_ja_' . $key, true)), 'model_fallback' === $key ? 1000 : 160);
         }
         $preview = wp_nonce_url(admin_url('admin-post.php?action=ja_reward_preview&face=' . $post->ID), 'ja_preview_' . $post->ID);
         printf('<p><a class="button" href="%s" target="_blank" rel="noopener">Simular face salva</a></p>', esc_url($preview));
-        echo '<p>Use <code>{{person}}</code> e <code>{{type}}</code> nos textos. A correspondência de campanha tem prioridade sobre a face geral do mesmo reward. Publique para ativar. A tag atual pode ser reconhecida automaticamente quando existe um único reward compatível na página.</p>';
+        echo '<p>Use <code>{{person}}</code>, <code>{{type}}</code> e <code>{{model}}</code> nos textos. Model é opcional. A correspondência de campanha tem prioridade sobre a face geral do mesmo reward. Publique para ativar. A tag atual pode ser reconhecida automaticamente quando existe um único reward compatível na página.</p>';
     }
 
     public static function save($id) {
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE || wp_is_post_revision($id) || !current_user_can('manage_options') || !current_user_can('edit_post', $id)) return;
         if (!isset($_POST['ja_reward_nonce']) || !is_string($_POST['ja_reward_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['ja_reward_nonce'])), 'ja_reward_save')) return;
-        foreach (array('reward_id', 'campaign_type', 'person_fallback', 'type_fallback') as $key) {
-            $value = isset($_POST['ja_' . $key]) && is_string($_POST['ja_' . $key]) ? substr(sanitize_text_field(wp_unslash($_POST['ja_' . $key])), 0, 160) : '';
+        foreach (array('reward_id', 'campaign_type', 'person_fallback', 'type_fallback', 'model_fallback') as $key) {
+            $value = isset($_POST['ja_' . $key]) && is_string($_POST['ja_' . $key]) ? mb_substr(sanitize_text_field(wp_unslash($_POST['ja_' . $key])), 0, 'model_fallback' === $key ? 1000 : 160) : '';
             if ('reward_id' === $key && $value && !preg_match('/^[0-9A-HJKMNP-TV-Z]{26}$/i', $value)) continue;
             update_post_meta($id, '_ja_' . $key, $value);
         }
@@ -153,6 +154,7 @@ final class JoinAds_Reward_Studio {
         $embedded = !empty($request['embedded']);
         $person = isset($request['person']) && is_string($request['person']) ? sanitize_text_field(wp_unslash($request['person'])) : '';
         $campaign = isset($request['type']) && is_string($request['type']) ? sanitize_text_field(wp_unslash($request['type'])) : '';
+        $model = isset($request['model']) && is_string($request['model']) ? mb_substr(sanitize_text_field(wp_unslash($request['model'])), 0, 1000) : '';
         nocache_headers();
         header('Content-Type: text/html; charset=' . get_option('blog_charset'));
         wp_enqueue_style('wp-block-library');
@@ -166,20 +168,20 @@ final class JoinAds_Reward_Studio {
         if (!$embedded) {
             echo '<header class="preview-toolbar"><p>Simulação da face salva · nenhum anúncio é solicitado.</p><form method="get">';
             foreach (array('action' => 'ja_reward_preview', 'face' => $id, '_wpnonce' => wp_create_nonce('ja_preview_' . $id)) as $key => $value) printf('<input type="hidden" name="%s" value="%s">', esc_attr($key), esc_attr($value));
-            printf('<label>Nome <input name="person" value="%s" maxlength="160"></label><label>Campanha <input name="type" value="%s" maxlength="160"></label>', esc_attr($person), esc_attr($campaign));
+            printf('<label>Nome / Base64 <input name="person" value="%s" maxlength="2048"></label><label>Campanha <input name="type" value="%s" maxlength="160"></label><label>Model (opcional) <input name="model" value="%s" maxlength="1000"></label>', esc_attr($person), esc_attr($campaign), esc_attr($model));
             echo '<button>Atualizar</button><button type="button" id="preview-gate">Simular anúncio carregando</button><button type="button" id="preview-reopen">Reabrir face</button></form></header>';
         }
         echo '<main class="preview-site"><h1>Uma página do seu site</h1><p>A face aparece sobre o conteúdo e usa o mesmo estilo da publicação.</p><i></i><i></i><i></i><i></i></main><div class="reward-modal-backdrop" data-ja-preview-overlay><div class="preview-card reward-modal" role="dialog" aria-label="Prévia"><section><h2>Interface nativa simulada</h2><button id="native-watch">Assistir</button><button id="native-close">Fechar</button></section></div></div><output class="ja-preview-status" aria-live="polite"></output>';
         echo $template;
         wp_print_scripts('ja-reward-studio');
-        printf('<script>window.JoinAdsRewardPreview=%s;</script><script src="%s"></script>', wp_json_encode(array('person' => $person, 'type' => $campaign, 'interactive' => $interactive)), esc_url(plugins_url('assets/preview.js', __FILE__)));
+        printf('<script>window.JoinAdsRewardPreview=%s;</script><script src="%s"></script>', wp_json_encode(array('person' => $person, 'type' => $campaign, 'model' => $model, 'interactive' => $interactive)), esc_url(plugins_url('assets/preview.js', __FILE__)));
         echo '</body></html>';
         exit;
     }
 
     public static function print_template($face, $reward, $appearance, $campaign, $custom_css = null) {
         if (null === $custom_css) $custom_css = JoinAds_Reward_Custom_CSS::get($face->ID);
-        printf('<template data-ja-face data-face-id="%s" data-reward-id="%s" data-campaign-type="%s" data-person-fallback="%s" data-type-fallback="%s" data-appearance="%s" data-custom-css="%s">', esc_attr($face->ID), esc_attr($reward), esc_attr($campaign), esc_attr(get_post_meta($face->ID, '_ja_person_fallback', true) ?: 'Visitante'), esc_attr(get_post_meta($face->ID, '_ja_type_fallback', true) ?: 'seu interesse'), esc_attr(wp_json_encode($appearance)), esc_attr($custom_css));
+        printf('<template data-ja-face data-face-id="%s" data-reward-id="%s" data-campaign-type="%s" data-person-fallback="%s" data-type-fallback="%s" data-appearance="%s" data-custom-css="%s" data-model-fallback="%s">', esc_attr($face->ID), esc_attr($reward), esc_attr($campaign), esc_attr(get_post_meta($face->ID, '_ja_person_fallback', true) ?: 'Visitante'), esc_attr(get_post_meta($face->ID, '_ja_type_fallback', true) ?: 'seu interesse'), esc_attr(wp_json_encode($appearance)), esc_attr($custom_css), esc_attr(get_post_meta($face->ID, '_ja_model_fallback', true)));
         echo self::render_face($face);
         echo '</template>';
     }

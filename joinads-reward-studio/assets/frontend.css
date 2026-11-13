@@ -66,6 +66,19 @@
 .ja-audience:not(.has-background):not([data-layout="inline"]){background:color-mix(in srgb,var(--ja-audience-accent,#16a34a) 10%,transparent)}
 .ja-audience-dot{flex:none;width:8px;height:8px;background:var(--ja-audience-accent,#16a34a);border-radius:50%;box-shadow:0 0 0 4px color-mix(in srgb,var(--ja-audience-accent,#16a34a) 12%,transparent)}
 .ja-audience-value{font-weight:750}
+/* Studio rows use native Group blocks; these rules only normalize their children. */
+.ja-face .ja-studio-row{display:flex;flex-direction:row;flex-wrap:wrap;width:100%;max-width:100%;min-width:0}
+.ja-face .ja-studio-row > *{min-width:0;max-width:100%;margin-block:0;margin-inline:0;overflow-wrap:anywhere}
+.ja-face .ja-studio-row > .wp-block-image img{max-width:100%}
+.ja-face .ja-studio-row.ja-row-equal{display:grid;grid-auto-flow:row;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr))}
+.ja-face .ja-studio-row.ja-row-equal > *{width:100%;justify-self:stretch}
+@media(max-width:640px){
+ .ja-face .ja-studio-row.ja-row-mobile-wrap{flex-wrap:wrap}
+ .ja-face .ja-studio-row.ja-row-mobile-nowrap{flex-wrap:nowrap}
+ .ja-face .ja-studio-row.ja-row-equal.ja-row-mobile-nowrap{grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);grid-template-columns:none}
+ .ja-face .ja-studio-row.ja-row-mobile-stack{display:flex;flex-direction:column;align-items:stretch}
+ .ja-face .ja-studio-row.ja-row-mobile-stack > *{flex:none;width:100%;text-align:inherit}
+}
 .ja-countdown{border-radius:var(--ja-clock-radius,14px)}
 .ja-countdown-clock{font-size:clamp(18px,7vw,var(--ja-clock-size,34px))}
 .ja-countdown-units{display:none;gap:8px;justify-content:center}

@@ -11,12 +11,13 @@
     const mobileKeys = { widthMode:'mobileWidthMode', width:'mobileWidth', heightMode:'mobileHeightMode', height:'mobileHeight', inset:'mobileInset', padding:'mobilePadding', radius:'mobileRadius', position:'mobilePosition', fontSize:'mobileFontSize', headingSize:'mobileHeadingSize' };
     const blockNames = { 'core/heading':'Título', 'core/paragraph':'Texto', 'core/image':'Imagem', 'joinads/reward-action':'Botão', 'joinads/reward-countdown':'Contagem regressiva', 'joinads/reward-badge':'Aviso e destaque', 'joinads/reward-audience':'Audiência simulada' };
     const order = window.JoinAdsRewardStudioOrder;
+    const layout = window.JoinAdsRewardStudioLayout;
     function plain(html) { const template=document.createElement('template'); template.innerHTML=html || ''; return template.content.textContent; }
     function formatIcon(id) { return el('span', { className:'ja-format-icon is-' + id, 'aria-hidden':true }, el('span', {className:'ja-format-window'}, el('i'),el('i'),el('b'))); }
     function section(title, help, children) { return el('section', {className:'ja-studio-section'}, el('h3',null,title),help ? el('p',{className:'ja-help'},help) : null,children); }
     function disclosure(title, children) { return el('details',{className:'ja-studio-disclosure'},el('summary',null,title),el('div',null,children)); }
 
-    function Preview({ content, settings, customCSS, person, campaign, mobile, revision, onSelect }) {
+    function Preview({ content, settings, customCSS, person, campaign, model, mobile, revision, onSelect }) {
         const frame=useRef(null), container=useRef(null);
         const [frameName]=useState(()=>'ja-preview-'+Math.random().toString(36).slice(2));
         const [available,setAvailable]=useState({width:800,height:650});
@@ -35,12 +36,12 @@
                 setStatus('loading');
                 const doc=frame.current.ownerDocument, form=doc.createElement('form');
                 form.method='post';form.action=config.previewUrl;form.target=frameName;form.hidden=true;
-                const values={action:'ja_reward_preview',face:config.postId,_wpnonce:config.nonce,content,appearance:JSON.stringify(settings),custom_css:customCSS,embedded:'1',person,type:campaign,editor_preview:'1'};
+                const values={action:'ja_reward_preview',face:config.postId,_wpnonce:config.nonce,content,appearance:JSON.stringify(settings),custom_css:customCSS,embedded:'1',person,type:campaign,model,editor_preview:'1'};
                 for(const [name,value] of Object.entries(values)){const input=doc.createElement('input');input.type='hidden';input.name=name;input.value=String(value);form.appendChild(input);}
                 doc.body.appendChild(form);form.submit();form.remove();
             },280);
             return ()=>clearTimeout(timeout);
-        },[content,JSON.stringify(settings),customCSS,person,campaign,revision,frameName]);
+        },[content,JSON.stringify(settings),customCSS,person,campaign,model,revision,frameName]);
         useEffect(()=>{
             function receive(event){
                 if(event.origin===location.origin && frame.current && event.source===frame.current.contentWindow && event.data && event.data.type==='ja-reward-preview-select')onSelect(event.data.index);
@@ -58,17 +59,23 @@
 
     function Studio() {
         const state=wp.data.useSelect(select=>{
-            const editor=select('core/editor');
-            return {postType:editor.getCurrentPostType(),meta:editor.getEditedPostAttribute('meta') || {},content:editor.getEditedPostContent(),blocks:select('core/block-editor').getBlocks()};
+            const editor=select('core/editor'),blockEditor=select('core/block-editor'),blocks=blockEditor.getBlocks();
+            const postType=editor.getCurrentPostType();
+            // Permissions can settle after the blocks load. Subscribe to them so the
+            // layout controls do not keep an early disabled state until another click.
+            const permissions=postType==='ja_reward_face'?JSON.stringify(order.flatten(blocks).map(block=>[blockEditor.canMoveBlock(block.clientId),blockEditor.canRemoveBlock(block.clientId),blockEditor.canEditBlock(block.clientId),blockEditor.canInsertBlockType('core/group',block.rootClientId)])):'';
+            return {postType,meta:editor.getEditedPostAttribute('meta') || {},content:editor.getEditedPostContent(),blocks,permissions};
         },[]);
         const { editPost }=wp.data.useDispatch('core/editor');
         const blockActions=wp.data.useDispatch('core/block-editor');
         const [open,setOpen]=useState(false),[tab,setTab]=useState('format'),[mobile,setMobile]=useState(false);
         const [person,setPerson]=useState('Maria'),[campaign,setCampaign]=useState('sua campanha');
+        const [model,setModel]=useState('');
         const [selected,setSelected]=useState(''),[query,setQuery]=useState(''),[reset,setReset]=useState(false);
         const [revision,setRevision]=useState(0),[undoCount,setUndoCount]=useState(0);
         const [cssOpen,setCSSOpen]=useState(false),[clearCSS,setClearCSS]=useState(false);
         const [dragging,setDragging]=useState(''),[dropTarget,setDropTarget]=useState(null),[moveStatus,setMoveStatus]=useState('');
+        const [partnerId,setPartnerId]=useState('');
         const history=useRef([]),dragSource=useRef('');
         if(state.postType!=='ja_reward_face')return null;
         const settings=design.sanitize(state.meta[metaKey]);
@@ -99,10 +106,56 @@
             setSelected(sourceId);setMoveStatus('Ordem atualizada. Confira a prévia.');
         }
         function endDrag(){dragSource.current='';setDragging('');setDropTarget(null);}
+        function parentRow(block){return block && blocks.find(parent=>parent.clientId===block.rootClientId&&layout.isRow(parent));}
+        function canGroup(sourceId,targetId){
+            const plan=layout.groupPlan(state.blocks,sourceId,targetId),store=wp.data.select('core/block-editor');
+            return plan&&plan.clientIds.every(id=>store.canMoveBlock(id)&&store.canRemoveBlock(id))&&store.canInsertBlockType('core/group',plan.rootClientId)&&(plan.rootClientId===plan.partnerRootClientId||store.canInsertBlocks([targetId],plan.rootClientId))?plan:null;
+        }
+        function organize(){
+            if(!active)return null;
+            const row=parentRow(active),store=wp.data.select('core/block-editor');
+            if(!row){
+                const candidates=editable.filter(block=>block.clientId!==active.clientId&&canGroup(active.clientId,block.clientId));
+                const partner=candidates.find(block=>block.clientId===partnerId)||candidates[0];
+                return section('Colocar lado a lado','O elemento selecionado fica à esquerda. Escolha o que deve aparecer à direita.',
+                    el('div',{className:'ja-line-creator'},el('div',{className:'ja-line-diagram','aria-hidden':true},el('span',null,'← Esquerda'),el('span',null,'Direita →')),
+                        el('p',{className:'ja-help'},'À esquerda: '+blockNames[active.name]),
+                        candidates.length?el(SelectControl,{label:'Elemento à direita',value:partner.clientId,options:candidates.map(block=>({value:block.clientId,label:blockNames[block.name]+' · '+plain(block.attributes.content||block.attributes.label||block.attributes.alt||'Imagem').slice(0,48)})),onChange:setPartnerId}):el('p',{className:'ja-help'},'Adicione outro elemento para criar uma linha. Blocos bloqueados não podem ser agrupados.'),
+                        el(Button,{variant:'secondary',disabled:!partner,onClick:()=>{
+                            const plan=partner&&canGroup(active.clientId,partner.clientId);if(!plan)return;
+                            // Match Gutenberg's grouping transform: replacement children
+                            // need fresh editor IDs while keeping their authored attributes.
+                            const left=wp.blocks.cloneBlock(plan.innerBlocks[0]);
+                            const group=wp.blocks.createBlock('core/group',plan.attributes,[left,wp.blocks.cloneBlock(plan.innerBlocks[1])]);
+                            if(plan.rootClientId===plan.partnerRootClientId){
+                                blockActions.replaceBlocks(plan.clientIds,group);
+                            }else{
+                                // Core Group accepts these children. Its insertion context
+                                // only exists after mounting, so insert the complete tree
+                                // as Gutenberg does instead of moving into an unmounted row.
+                                blockActions.removeBlocks([partner.clientId],false);
+                                blockActions.replaceBlocks([active.clientId],group);
+                            }
+                            setSelected(left.clientId);setPartnerId('');setMoveStatus('Linha criada: um elemento à esquerda e outro à direita.');
+                        }},'Colocar lado a lado')));
+            }
+            const values=layout.read(row.attributes),canEdit=store.canEditBlock(row.clientId);
+            const patch=changes=>{if(canEdit)patchBlock(row,layout.update(row.attributes,changes));};
+            const canSeparate=store.canRemoveBlock(row.clientId)&&row.innerBlocks.every(block=>store.canMoveBlock(block.clientId)&&store.canInsertBlockType(block.name,row.rootClientId));
+            return section('Layout da linha','As opções abaixo valem para todos os elementos desta linha.',el('div',{className:'ja-line-controls'},
+                el('div',{className:'ja-line-diagram','aria-hidden':true},el('span',null,'← Esquerda'),el('span',null,'Direita →')),
+                el(SelectControl,{label:'Distribuição horizontal',value:values.justify,disabled:!canEdit,options:[{label:'Pontas opostas (esquerda e direita)',value:'space-between'},{label:'Juntos à esquerda',value:'left'},{label:'Juntos no centro',value:'center'},{label:'Juntos à direita',value:'right'}],onChange:justify=>patch({justify})}),
+                el(SelectControl,{label:'Largura dos elementos',value:values.sizing,disabled:!canEdit,options:[{label:'Conforme o conteúdo',value:'auto'},{label:'Colunas iguais',value:'equal'}],onChange:sizing=>patch({sizing})}),
+                el(SelectControl,{label:'Alinhamento vertical',value:values.align,disabled:!canEdit,options:[{label:'Topo',value:'top'},{label:'Centro',value:'center'},{label:'Base',value:'bottom'},{label:'Mesma altura',value:'stretch'}],onChange:align=>patch({align})}),
+                el(RangeControl,{label:'Espaço entre elementos (px)',value:values.gap,min:0,max:64,disabled:!canEdit,onChange:gap=>patch({gap:gap??12})}),
+                el(SelectControl,{label:'No celular',value:values.mobile,disabled:!canEdit,options:[{label:'Quebrar a linha se precisar',value:'wrap'},{label:'Empilhar um abaixo do outro',value:'stack'},{label:'Manter lado a lado',value:'nowrap'}],onChange:mobile=>patch({mobile})}),
+                el('div',{className:'ja-line-actions'},el(Button,{variant:'secondary',disabled:!row.innerBlocks.every(block=>store.canMoveBlock(block.clientId)),onClick:()=>blockActions.replaceInnerBlocks(row.clientId,[...row.innerBlocks].reverse(),false)},'Inverter ordem'),
+                    el(Button,{variant:'tertiary',disabled:!canSeparate,onClick:()=>{if(canSeparate){const children=row.innerBlocks.map(block=>wp.blocks.cloneBlock(block));blockActions.replaceBlocks([row.clientId],children);setSelected(children[0]?.clientId||'');setMoveStatus('Elementos separados. Conteúdo e estilos mantidos.');}}},'Separar elementos'))));
+        }
         function contentList(){return el('div',{className:'ja-content-list',role:'list','aria-label':'Ordem dos elementos'},editable.map((block,index)=>{
             const previous=editable[index-1],next=editable[index+1],canMove=wp.data.select('core/block-editor').canMoveBlock(block.clientId);
             const drop=dropTarget&&dropTarget.id===block.clientId?dropTarget:null;
-            const label=blockNames[block.name]+' '+(index+1);
+            const label=blockNames[block.name]+' '+(index+1),row=parentRow(block);
             return el('div',{key:block.clientId,role:'listitem','data-ja-content-id':block.clientId,draggable:canMove,
                 className:'ja-content-row '+(active&&active.clientId===block.clientId?'is-selected ':'')+(dragging===block.clientId?'is-dragging ':'')+(drop?'is-drop-'+(drop.after?'after':'before'):''),
                 onDragStart:event=>{if(!canMove){event.preventDefault();return;}dragSource.current=block.clientId;setDragging(block.clientId);setMoveStatus('');event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',block.clientId);},
@@ -114,7 +167,7 @@
                 el('span',{className:'ja-content-grip','aria-hidden':true},'⠿'),
                 el('button',{type:'button',className:'ja-content-select','aria-pressed':!!active&&active.clientId===block.clientId,onClick:()=>setSelected(block.clientId),onKeyDown:event=>{
                     if(event.altKey&&['ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();const target=event.key==='ArrowUp'?previous:next;if(target)move(block.clientId,target.clientId,event.key==='ArrowDown');}
-                }},el('span',{className:'ja-content-index'},String(index+1).padStart(2,'0')),el('span',{className:'ja-content-summary'},el('strong',null,blockNames[block.name]),el('small',null,plain(block.attributes.content || block.attributes.label || block.attributes.alt || 'Escolher imagem').slice(0,64)))),
+                }},el('span',{className:'ja-content-index'},String(index+1).padStart(2,'0')),el('span',{className:'ja-content-summary'},el('strong',null,blockNames[block.name]),el('small',null,plain(block.attributes.content || block.attributes.label || block.attributes.alt || 'Escolher imagem').slice(0,64)),row?el('span',{className:'ja-line-chip'},'↔ Linha '+(blocks.filter(layout.isRow).findIndex(item=>item.clientId===row.clientId)+1)):null)),
                 el('div',{className:'ja-content-movers'},el('button',{type:'button','aria-label':'Subir '+label,title:'Subir (Alt + ↑)',disabled:!previous||!movement(block.clientId,previous.clientId,false),onClick:()=>move(block.clientId,previous.clientId,false)},'↑'),el('button',{type:'button','aria-label':'Descer '+label,title:'Descer (Alt + ↓)',disabled:!next||!movement(block.clientId,next.clientId,true),onClick:()=>move(block.clientId,next.clientId,true)},'↓')));
         }));}
         function cssEditor(){
@@ -166,7 +219,7 @@
             if(['core/heading','core/paragraph'].includes(active.name)){
                 controls.push(el('label',{key:'label',className:'ja-control-label'},blockNames[active.name]));
                 controls.push(el(RichText,{key:'content',tagName:'div',className:'ja-studio-richtext','aria-label':'Editar '+blockNames[active.name].toLowerCase(),value:a.content,allowedFormats:['core/bold','core/italic','core/link'],onChange:content=>patch({content})}));
-                controls.push(el('p',{key:'tip',className:'ja-help'},'Use {{person}} para o nome e {{type}} para a campanha.'));
+                controls.push(el('p',{key:'tip',className:'ja-help'},'Use {{person}} para o nome, {{type}} para a campanha e {{model}} para um conteúdo opcional da URL.'));
             }
             if(active.name==='core/image')controls.push(imagePicker(a.url,media=>patch({id:media.id,url:media.url,alt:media.alt || ''}),()=>patch({id:undefined,url:undefined,alt:''})),el(TextControl,{key:'alt',label:'Descrição da imagem',value:a.alt || '',onChange:alt=>patch({alt})}));
             if(active.name==='joinads/reward-action')controls.push(
@@ -204,9 +257,10 @@
                 disclosure('Botões e efeitos',fields(['buttonRadius','buttonWidth','buttonFontSize','buttonHover','buttonEffect'])));
             if(tab==='content')return el(wp.element.Fragment,null,
                 section('Conteúdo da sua face','Arraste os elementos para mudar a ordem ou use as setas. Clique para editar.',el(wp.element.Fragment,null,contentList(),el('p',{role:'status',className:'ja-order-status'},moveStatus))),
+                organize(),
                 contentEditor(),
                 section('Adicionar elemento',null,el('div',{className:'ja-add-grid'},Object.entries(blockNames).map(([name,label])=>el(Button,{key:name,variant:'secondary',onClick:()=>addBlock(name)},'+ '+label)))),
-                el('p',{className:'ja-help'},'Use Alt + ↑ ou Alt + ↓ no item selecionado para reordenar pelo teclado. Para criar colunas e grupos, abra o editor de blocos.'));
+                el('p',{className:'ja-help'},'Use Alt + ↑ ou Alt + ↓ no item selecionado para reordenar pelo teclado. Crie linhas aqui e use o editor de blocos para estruturas mais complexas.'));
             if(cssOpen)return cssEditor();
             const normalize=value=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
             return el(wp.element.Fragment,null,
@@ -233,9 +287,9 @@
                         }},label))),
                         el('div',{className:'ja-studio-scroll',id:'ja-studio-panel',role:'tabpanel','aria-labelledby':'ja-tab-'+tab},body())),
                     el('main',{className:'ja-studio-canvas'},
-                        el(Preview,{content:state.content,settings,customCSS,person,campaign,mobile,revision,onSelect:selectPreview}),
+                        el(Preview,{content:state.content,settings,customCSS,person,campaign,model,mobile,revision,onSelect:selectPreview}),
                         el('div',{className:'ja-preview-options'},
-                            el('details',null,el('summary',null,'Testar nome e campanha'),el('div',null,el(TextControl,{label:'Nome do visitante',value:person,onChange:setPerson,maxLength:160}),el(TextControl,{label:'Tipo / campanha',value:campaign,onChange:setCampaign,maxLength:160}))),
+                            el('details',null,el('summary',null,'Testar nome, campanha e model'),el('div',null,el(TextControl,{label:'Nome do visitante',help:'Texto ou Base64. Ex.: Sm9zw6k= exibe José.',value:person,onChange:setPerson,maxLength:2048}),el(TextControl,{label:'Tipo / campanha',value:campaign,onChange:setCampaign,maxLength:160}),el(TextControl,{label:'Model (opcional)',help:'Use {{model}} no conteúdo para exibir este texto.',value:model,onChange:setModel,maxLength:1000}))),
                             el(Button,{variant:'tertiary',onClick:()=>setRevision(revision+1)},'Reabrir prévia')))),
                 el('footer',{className:'ja-studio-footer'},el('span',null,'As alterações ficam no editor. Salve no WordPress para atualizar a face.'),el('span',null,'Anúncio e recompensa seguem no Core.'))):null);
     }

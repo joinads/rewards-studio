@@ -84,6 +84,12 @@
 .ja-content-row.is-drop-before::before { top:-5px; }.ja-content-row.is-drop-after::after { bottom:-5px; }
 .ja-order-status { margin:8px 0 0; color:#33694e; font-size:11px; min-height:0; }
 .ja-order-status:empty { display:none; }
+.ja-line-chip { display:inline-block; margin-top:3px; font:10px/1.5 system-ui; padding:1px 5px; border-radius:4px; background:#e4edfc; color:#466993; }
+.ja-line-creator,.ja-line-controls { padding:14px; border:1px solid #dce5f2; border-radius:8px; background:#f8faff; }
+.ja-line-diagram { display:flex; justify-content:space-between; gap:16px; border:1px dashed #bdcce3; background:#fff; border-radius:6px; padding:10px; margin-bottom:16px; font:11px system-ui; color:#6c80a0; }
+.ja-line-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.ja-line-actions .components-button,.ja-line-creator > .components-button { border-radius:6px; font-size:12px; }
+.ja-line-creator > .components-button { width:100%; justify-content:center; }
 .ja-content-index { font:10px ui-monospace,monospace; color:#99a7bd; }
 .ja-content-editor { padding:18px 14px 0; border-radius:8px; border:1px solid #d9e4f8; background:#f7faff; margin-bottom:24px; }
 .ja-control-label { display:block; font-size:12px; color:#53627b; margin:12px 0 8px; }
@@ -102,8 +108,8 @@
 .ja-preview-options { flex:none; border-top:1px solid #e0e6ef; padding:12px 24px; display:flex; justify-content:space-between; gap:16px; align-items:start; background:#f8fafd; }
 .ja-preview-options details { flex:1; }
 .ja-preview-options summary { cursor:pointer; color:#66758d; font-size:12px; padding:6px 0; }
-.ja-preview-options details > div { display:flex; gap:12px; padding-top:14px; }
-.ja-preview-options .components-base-control { flex:1; min-width:0; margin:0; }
+.ja-preview-options details > div { display:flex; flex-wrap:wrap; gap:12px; padding-top:14px; }
+.ja-preview-options .components-base-control { flex:1 1 150px; min-width:0; margin:0; }
 .ja-studio-footer { flex:none; display:flex; justify-content:space-between; gap:12px; padding:12px 24px; font-size:10px; color:#99a3b5; background:#fff; border-top:1px solid #e6eaf0; }
 .ja-studio-warning { flex:none; padding:8px 24px; background:#fff8e8; color:#805c19; font-size:12px; }
 .ja-reset-confirm { border:1px solid #edd5c0; padding:12px; margin-top:12px; border-radius:6px; background:#fff9f2; }

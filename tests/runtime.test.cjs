@@ -49,6 +49,44 @@ test('personalizes text safely, selects exact campaign, keeps unrelated reward n
     assert.equal(ctx.root.getAttribute('aria-label'), '<img src=x onerror=alert(1)>: carro');
     ctx.dispose();
 });
+test('person accepts Base64, UTF-8, URL-safe alphabet and missing padding without decoding type',()=>{
+    for(const name of ['Maria','João da Conceição','😃 Ana','aþ','A'.repeat(160)]){
+        for(const encoded of [Buffer.from(name).toString('base64'),Buffer.from(name).toString('base64url')]){
+            const ctx=setup('?person='+encodeURIComponent(encoded)+'&type=TWFyaWE%3D',template());ctx.fire();
+            assert.equal(ctx.root.querySelector('.ja-face h2').textContent,name+': TWFyaWE=');ctx.dispose();
+        }
+    }
+    for(const name of ['😃 Ana','aþ']){
+        const encoded=Buffer.from(name).toString('base64');assert.ok(encoded.includes('+'));
+        const ctx=setup('?person='+encoded,template());ctx.fire();
+        assert.equal(ctx.root.querySelector('.ja-face h2').textContent,name+': conteúdo');ctx.dispose();
+    }
+});
+test('plain names, malformed Base64 and invalid UTF-8 fall back safely; decoded markup remains text',()=>{
+    for(const name of ['Maria','Ana Paula','José','%%%%','wyg=','AA==']){
+        const ctx=setup('?person='+encodeURIComponent(name),template());ctx.fire();
+        assert.equal(ctx.root.querySelector('.ja-face h2').textContent,name+': conteúdo');ctx.dispose();
+    }
+    const html='<img src=x onerror=alert(1)>',ctx=setup('?person='+Buffer.from(html).toString('base64url'),template());ctx.fire();
+    assert.equal(ctx.root.querySelector('.ja-face h2').textContent,html+': conteúdo');assert.equal(ctx.root.querySelector('img'),null);ctx.dispose();
+    const empty=setup('?person=',template());empty.fire();assert.equal(empty.root.querySelector('.ja-face h2').textContent,'Visitante: conteúdo');empty.dispose();
+});
+test('optional model personalizes text only, does not select a campaign and can use a per-face fallback',()=>{
+    const value='<img src=x onerror=alert(1)> {{person}} & modelo à escolha';
+    const ctx=setup('?person=TWFyaWE%3D&model='+encodeURIComponent(value),template('carro','Outra campanha')+template('','{{person}} | {{model}} | {{type}}'));
+    ctx.fire();
+    assert.equal(ctx.root.querySelector('.ja-face h2').textContent,'Maria | '+value+' | conteúdo');
+    assert.equal(ctx.root.querySelector('.ja-face img'),null);ctx.dispose();
+    for(const query of ['', '?model=', '?model=%20%00%20']){
+        const empty=setup(query,template('','Conteúdo: {{ model }}'));empty.fire();
+        assert.equal(empty.root.querySelector('.ja-face h2').textContent,'Conteúdo: ');empty.dispose();
+        const fallback=setup(query,template('','{{model}}'));
+        fallback.w.document.querySelector('template').dataset.modelFallback='Conteúdo padrão';fallback.fire();
+        assert.equal(fallback.root.querySelector('.ja-face h2').textContent,'Conteúdo padrão');fallback.dispose();
+    }
+    const long=setup('?model='+('a'.repeat(1001)),template('','{{model}}'));long.fire();
+    assert.equal(long.root.querySelector('.ja-face h2').textContent.length,1000);long.dispose();
+});
 test('pending/ready gating and native click delegation; original restored before delivery', async () => {
     const ctx = setup('', template());
     let clicks = 0;
