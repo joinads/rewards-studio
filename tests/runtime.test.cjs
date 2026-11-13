@@ -11,6 +11,7 @@ function setup(query = '', html = '') {
     const button = root.querySelector('#native');
     const close = root.querySelector('#close');
     w.JoinAdsRewardDesignSchema = JSON.parse(fs.readFileSync('joinads-reward-studio/config/appearance.json', 'utf8'));
+    w.eval(fs.readFileSync('joinads-reward-studio/assets/custom-css.js', 'utf8'));
     w.eval(fs.readFileSync('joinads-reward-studio/assets/design.js', 'utf8'));
     w.eval(fs.readFileSync('joinads-reward-studio/assets/urgency.js', 'utf8'));
     w.eval(runtime);
@@ -25,6 +26,19 @@ function template(type = '', text = '{{person}}: {{type}}', watch = true) {
     return `<template data-ja-face data-reward-id="${id}" data-campaign-type="${type}" data-person-fallback="Visitante" data-type-fallback="conteúdo"><h2>${text}</h2>${watch ? '<button data-ja-action="watch">Assistir</button>' : ''}<button data-ja-action="close">Sair</button></template>`;
 }
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
+test('custom CSS is removed before the Core CTA runs and cannot bypass readiness',async()=>{
+    const ctx=setup('',template());
+    ctx.w.document.querySelector('template').dataset.customCss='.ja-face h2 { color:red } .ja-face-button { opacity:1 }';
+    ctx.fire();
+    assert.ok(ctx.w.document.querySelector('[data-ja-custom-style]'));
+    const cta=ctx.root.querySelector('[data-ja-action=watch]');
+    assert.equal(cta.disabled,true);
+    let clicks=0;
+    ctx.button.addEventListener('click',()=>{clicks++;assert.equal(ctx.w.document.querySelector('[data-ja-custom-style]'),null);assert.equal(ctx.root.hasAttribute('data-ja-css-scope'),false);});
+    cta.click();assert.equal(clicks,0);
+    ctx.button.disabled=false;await tick();cta.click();
+    assert.equal(clicks,1);ctx.dispose();
+});
 test('personalizes text safely, selects exact campaign, keeps unrelated reward native', () => {
     const ctx = setup('?person=%3Cimg%20src=x%20onerror=alert(1)%3E&type=carro', template('', 'geral') + template('carro'));
     ctx.fire('unrelated');

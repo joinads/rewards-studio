@@ -31,7 +31,7 @@
         'bottom-left': ['start', 'end'], 'bottom-right': ['end', 'end']
     };
     const fonts = { system: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', serif: 'Georgia, "Times New Roman", serif', mono: 'ui-monospace, SFMono-Regular, monospace', inherit: 'inherit' };
-    function apply(root, face, raw) {
+    function apply(root, face, raw, customCSS = '') {
         const settings = sanitize(raw);
         const overlay = root.closest('.reward-modal-backdrop, #ja-drawer, [data-ja-preview-overlay]') || root.parentElement;
         const external = root.closest('#ja-drawer') ? document.getElementById('ja-backdrop') : null;
@@ -71,10 +71,12 @@
         face.dataset.jaButtonEffect = settings.buttonEffect;
         if (overlay && overlay !== root) overlay.classList.add('ja-designed-overlay');
         if (external) { external.classList.add('ja-designed-backdrop'); overlay.classList.add('ja-designed-drawer'); }
+        const restoreCSS = window.JoinAdsRewardCustomCSS ? window.JoinAdsRewardCustomCSS.apply(root, face, [root.closest('.reward-modal-backdrop, #ja-drawer, [data-ja-preview-overlay]'), external], customCSS) : () => {};
         let restored = false;
         return () => {
             if (restored) return;
             restored = true;
+            restoreCSS();
             root.querySelectorAll(':scope > .ja-face-background-image').forEach(image => image.remove());
             delete root.dataset.jaAnimation;
             for (const entry of snapshot) {

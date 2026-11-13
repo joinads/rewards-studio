@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0 — 2026-11-13
+
+- Menu do WordPress renomeado para Reward Studio, preservando as faces existentes.
+- Reordenação dos elementos diretamente em Conteúdo: arrastar e soltar, setas e atalhos Alt + ↑/↓.
+- Mantém os blocos, grupos, atributos e ações ao mudar a ordem; respeita bloqueios do editor.
+- Novo botão Mais → Avançado com editor CSS por face, prévia ao vivo, exemplos, validação e desfazer.
+- CSS com seletores, pseudoelementos, @media, @supports e animações @keyframes isoladas por instância.
+- CSS salvo junto à face e nas revisões, limitado ao reward selecionado e removido antes da entrega nativa.
+
 ## 0.4.0 — 2026-11-12
 
 - Contagem de audiência simulada com texto, limites, valor inicial, variação e intervalo editáveis.

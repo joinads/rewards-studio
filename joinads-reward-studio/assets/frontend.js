@@ -65,7 +65,7 @@
         const label = face.querySelector('h1,h2,h3,h4,h5,h6');
         const hadFocus = root.contains(document.activeElement);
         originals.forEach(child => child.classList.add('ja-native-hidden'));
-        const restoreDesign = design ? design.apply(root, face, settings) : () => {};
+        const restoreDesign = design ? design.apply(root, face, settings, template.dataset.customCss || '') : () => {};
         root.classList.add('ja-face-active');
         root.appendChild(face);
         root.removeAttribute('aria-labelledby');

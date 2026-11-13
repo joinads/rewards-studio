@@ -10,13 +10,13 @@
     const metaKey = '_ja_appearance';
     const mobileKeys = { widthMode:'mobileWidthMode', width:'mobileWidth', heightMode:'mobileHeightMode', height:'mobileHeight', inset:'mobileInset', padding:'mobilePadding', radius:'mobileRadius', position:'mobilePosition', fontSize:'mobileFontSize', headingSize:'mobileHeadingSize' };
     const blockNames = { 'core/heading':'Título', 'core/paragraph':'Texto', 'core/image':'Imagem', 'joinads/reward-action':'Botão', 'joinads/reward-countdown':'Contagem regressiva', 'joinads/reward-badge':'Aviso e destaque', 'joinads/reward-audience':'Audiência simulada' };
-    function flatten(blocks) { return blocks.flatMap(block => [block, ...flatten(block.innerBlocks || [])]); }
+    const order = window.JoinAdsRewardStudioOrder;
     function plain(html) { const template=document.createElement('template'); template.innerHTML=html || ''; return template.content.textContent; }
     function formatIcon(id) { return el('span', { className:'ja-format-icon is-' + id, 'aria-hidden':true }, el('span', {className:'ja-format-window'}, el('i'),el('i'),el('b'))); }
     function section(title, help, children) { return el('section', {className:'ja-studio-section'}, el('h3',null,title),help ? el('p',{className:'ja-help'},help) : null,children); }
     function disclosure(title, children) { return el('details',{className:'ja-studio-disclosure'},el('summary',null,title),el('div',null,children)); }
 
-    function Preview({ content, settings, person, campaign, mobile, revision, onSelect }) {
+    function Preview({ content, settings, customCSS, person, campaign, mobile, revision, onSelect }) {
         const frame=useRef(null), container=useRef(null);
         const [frameName]=useState(()=>'ja-preview-'+Math.random().toString(36).slice(2));
         const [available,setAvailable]=useState({width:800,height:650});
@@ -35,12 +35,12 @@
                 setStatus('loading');
                 const doc=frame.current.ownerDocument, form=doc.createElement('form');
                 form.method='post';form.action=config.previewUrl;form.target=frameName;form.hidden=true;
-                const values={action:'ja_reward_preview',face:config.postId,_wpnonce:config.nonce,content,appearance:JSON.stringify(settings),embedded:'1',person,type:campaign,editor_preview:'1'};
+                const values={action:'ja_reward_preview',face:config.postId,_wpnonce:config.nonce,content,appearance:JSON.stringify(settings),custom_css:customCSS,embedded:'1',person,type:campaign,editor_preview:'1'};
                 for(const [name,value] of Object.entries(values)){const input=doc.createElement('input');input.type='hidden';input.name=name;input.value=String(value);form.appendChild(input);}
                 doc.body.appendChild(form);form.submit();form.remove();
             },280);
             return ()=>clearTimeout(timeout);
-        },[content,JSON.stringify(settings),person,campaign,revision,frameName]);
+        },[content,JSON.stringify(settings),customCSS,person,campaign,revision,frameName]);
         useEffect(()=>{
             function receive(event){
                 if(event.origin===location.origin && frame.current && event.source===frame.current.contentWindow && event.data && event.data.type==='ja-reward-preview-select')onSelect(event.data.index);
@@ -67,19 +67,70 @@
         const [person,setPerson]=useState('Maria'),[campaign,setCampaign]=useState('sua campanha');
         const [selected,setSelected]=useState(''),[query,setQuery]=useState(''),[reset,setReset]=useState(false);
         const [revision,setRevision]=useState(0),[undoCount,setUndoCount]=useState(0);
-        const history=useRef([]);
+        const [cssOpen,setCSSOpen]=useState(false),[clearCSS,setClearCSS]=useState(false);
+        const [dragging,setDragging]=useState(''),[dropTarget,setDropTarget]=useState(null),[moveStatus,setMoveStatus]=useState('');
+        const history=useRef([]),dragSource=useRef('');
         if(state.postType!=='ja_reward_face')return null;
         const settings=design.sanitize(state.meta[metaKey]);
+        const customCSS=state.meta._ja_custom_css || '';
         const current=design.currentFormat(settings);
-        const blocks=flatten(state.blocks);
+        const blocks=order.flatten(state.blocks);
         const editable=blocks.filter(block=>blockNames[block.name]);
         const active=editable.find(block=>block.clientId===selected) || editable[0];
         const hasWatch=blocks.some(block=>block.name==='joinads/reward-action' && block.attributes.action!=='close');
+        function remember(){history.current=[...history.current.slice(-29),{settings,customCSS}];setUndoCount(history.current.length);}
         function update(values){
-            history.current=[...history.current.slice(-29),settings];setUndoCount(history.current.length);
+            remember();
             editPost({meta:{...state.meta,[metaKey]:design.sanitize({...settings,...values})}});
         }
-        function undo(){const last=history.current.pop();if(last)editPost({meta:{...state.meta,[metaKey]:last}});setUndoCount(history.current.length);}
+        function updateCSS(value){remember();editPost({meta:{...state.meta,_ja_custom_css:value}});}
+        function undo(){const last=history.current.pop();if(last)editPost({meta:{...state.meta,[metaKey]:last.settings,_ja_custom_css:last.customCSS}});setUndoCount(history.current.length);}
+        function movement(sourceId,targetId,after){
+            const destination=order.destination(state.blocks,sourceId,targetId,after);
+            const store=wp.data.select('core/block-editor');
+            if(!destination || !store.canMoveBlock(sourceId))return null;
+            if(destination.fromRootClientId!==destination.toRootClientId && (!store.canRemoveBlock(sourceId) || !store.canInsertBlocks([sourceId],destination.toRootClientId)))return null;
+            return destination;
+        }
+        function move(sourceId,targetId,after){
+            const next=movement(sourceId,targetId,after);
+            if(!next)return;
+            blockActions.moveBlocksToPosition(next.clientIds,next.fromRootClientId,next.toRootClientId,next.index);
+            setSelected(sourceId);setMoveStatus('Ordem atualizada. Confira a prévia.');
+        }
+        function endDrag(){dragSource.current='';setDragging('');setDropTarget(null);}
+        function contentList(){return el('div',{className:'ja-content-list',role:'list','aria-label':'Ordem dos elementos'},editable.map((block,index)=>{
+            const previous=editable[index-1],next=editable[index+1],canMove=wp.data.select('core/block-editor').canMoveBlock(block.clientId);
+            const drop=dropTarget&&dropTarget.id===block.clientId?dropTarget:null;
+            const label=blockNames[block.name]+' '+(index+1);
+            return el('div',{key:block.clientId,role:'listitem','data-ja-content-id':block.clientId,draggable:canMove,
+                className:'ja-content-row '+(active&&active.clientId===block.clientId?'is-selected ':'')+(dragging===block.clientId?'is-dragging ':'')+(drop?'is-drop-'+(drop.after?'after':'before'):''),
+                onDragStart:event=>{if(!canMove){event.preventDefault();return;}dragSource.current=block.clientId;setDragging(block.clientId);setMoveStatus('');event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',block.clientId);},
+                onDragEnd:endDrag,onDragOver:event=>{
+                    const rect=event.currentTarget.getBoundingClientRect(),after=event.clientY>rect.top+rect.height/2;
+                    if(!movement(dragSource.current,block.clientId,after)){setDropTarget(null);return;}
+                    event.preventDefault();event.dataTransfer.dropEffect='move';setDropTarget({id:block.clientId,after});
+                },onDrop:event=>{event.preventDefault();const rect=event.currentTarget.getBoundingClientRect();move(dragSource.current,block.clientId,event.clientY>rect.top+rect.height/2);endDrag();}},
+                el('span',{className:'ja-content-grip','aria-hidden':true},'⠿'),
+                el('button',{type:'button',className:'ja-content-select','aria-pressed':!!active&&active.clientId===block.clientId,onClick:()=>setSelected(block.clientId),onKeyDown:event=>{
+                    if(event.altKey&&['ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();const target=event.key==='ArrowUp'?previous:next;if(target)move(block.clientId,target.clientId,event.key==='ArrowDown');}
+                }},el('span',{className:'ja-content-index'},String(index+1).padStart(2,'0')),el('span',{className:'ja-content-summary'},el('strong',null,blockNames[block.name]),el('small',null,plain(block.attributes.content || block.attributes.label || block.attributes.alt || 'Escolher imagem').slice(0,64)))),
+                el('div',{className:'ja-content-movers'},el('button',{type:'button','aria-label':'Subir '+label,title:'Subir (Alt + ↑)',disabled:!previous||!movement(block.clientId,previous.clientId,false),onClick:()=>move(block.clientId,previous.clientId,false)},'↑'),el('button',{type:'button','aria-label':'Descer '+label,title:'Descer (Alt + ↓)',disabled:!next||!movement(block.clientId,next.clientId,true),onClick:()=>move(block.clientId,next.clientId,true)},'↓')));
+        }));}
+        function cssEditor(){
+            const result=window.JoinAdsRewardCustomCSS.compile(customCSS);
+            const examples=[['Título','.ja-face h2 {\n  color: #7c3aed;\n  font-size: 36px;\n}'],['Botão','.ja-face-button {\n  border-radius: 999px;\n  background: linear-gradient(120deg, #2563eb, #7c3aed);\n  color: #ffffff;\n}'],['Janela','.ja-designed-modal {\n  border-radius: 24px !important;\n  background: #f8fafc !important;\n}'],['Celular','@media (max-width: 640px) {\n  .ja-face { padding: 20px; }\n  .ja-face h2 { font-size: 26px; }\n}']];
+            return el(wp.element.Fragment,null,el(Button,{variant:'tertiary',onClick:()=>setCSSOpen(false)},'← Voltar para Mais'),
+                section('CSS personalizado','Ajuste o visual desta face. A prévia atualiza enquanto você escreve.',
+                    el(wp.element.Fragment,null,el('label',{className:'ja-control-label',htmlFor:'ja-custom-css'},'Código CSS'),
+                        el('textarea',{id:'ja-custom-css',className:'ja-css-editor',value:customCSS,maxLength:20000,spellCheck:false,autoCapitalize:'off',autoCorrect:'off',wrap:'off','aria-describedby':'ja-css-feedback',placeholder:'.ja-face h2 {\n  color: #7c3aed;\n}',onChange:event=>updateCSS(event.target.value),onKeyDown:event=>{
+                            if(event.key==='Tab'&&!event.shiftKey){event.preventDefault();const node=event.currentTarget,start=node.selectionStart,end=node.selectionEnd;updateCSS(customCSS.slice(0,start)+'  '+customCSS.slice(end));requestAnimationFrame(()=>{node.selectionStart=node.selectionEnd=start+2;});}
+                        }}),el('div',{className:'ja-css-meta'},el('span',null,customCSS.length.toLocaleString('pt-BR')+' / 20.000'),el('span',null,'CSS por face')),
+                        el('p',{id:'ja-css-feedback',role:'status',className:'ja-css-feedback '+(result.error?'is-error':'')},result.error?result.error+' O CSS não será aplicado.':customCSS.trim()?'CSS pronto para a prévia. Salve no WordPress para publicar.':'Sem CSS adicional. Os controles de aparência continuam ativos.'))),
+                section('Exemplos para começar','Clique para adicionar ao final do seu código.',el('div',{className:'ja-css-examples'},examples.map(([label,code])=>el(Button,{key:label,variant:'secondary',disabled:customCSS.length+code.length+2>20000,onClick:()=>updateCSS((customCSS.trimEnd()?customCSS.trimEnd()+'\n\n':'')+code)},'+ '+label)))),
+                disclosure('Seletores e recursos',el('div',{className:'ja-css-reference'},el('p',null,el('code',null,'.ja-face'),' Conteúdo da face.'),el('p',null,el('code',null,'.ja-face h2'),' Títulos.'),el('p',null,el('code',null,'.ja-face-button'),' Botões.'),el('p',null,el('code',null,'.ja-countdown'),' Contagem regressiva.'),el('p',null,el('code',null,'.ja-designed-modal'),' Janela do reward.'),el('p',null,el('code',null,'.ja-designed-overlay'),' Fundo atrás da janela.'),el('p',{className:'ja-help'},'Aceita @media, @supports e @keyframes. Use !important para substituir propriedades fixas da janela. Escreva os seletores completos, sem aninhamento. O CSS fica limitado à face e é removido antes da entrega do anúncio.'))),
+                el(Button,{variant:'tertiary',isDestructive:true,disabled:!customCSS,onClick:()=>setClearCSS(true)},'Limpar CSS'),clearCSS?el('div',{className:'ja-reset-confirm'},el('p',null,'Remover todo o CSS desta face?'),el(Button,{variant:'primary',onClick:()=>{updateCSS('');setClearCSS(false);}},'Sim, limpar CSS'),el(Button,{variant:'tertiary',onClick:()=>setClearCSS(false)},'Cancelar')):null);
+        }
         function patchBlock(block,values){blockActions.updateBlockAttributes(block.clientId,values);}
         function selectPreview(index){if(Number.isInteger(index) && editable[index]){setSelected(editable[index].clientId);setTab('content');}}
         function addBlock(name){
@@ -152,12 +203,14 @@
                 disclosure('Fundo atrás da janela',fields(['overlayColor','overlayOpacity','overlayBlur'])),
                 disclosure('Botões e efeitos',fields(['buttonRadius','buttonWidth','buttonFontSize','buttonHover','buttonEffect'])));
             if(tab==='content')return el(wp.element.Fragment,null,
-                section('Conteúdo da sua face','Clique na lista ou em um elemento da prévia para editar.',el('div',{className:'ja-content-list'},editable.map((block,index)=>el('button',{type:'button',key:block.clientId,className:'ja-content-row '+(active&&active.clientId===block.clientId?'is-selected':''),onClick:()=>setSelected(block.clientId)},el('span',{className:'ja-content-index'},String(index+1).padStart(2,'0')),el('span',null,el('strong',null,blockNames[block.name]),el('small',null,plain(block.attributes.content || block.attributes.label || block.attributes.alt || 'Escolher imagem').slice(0,64))))))),
+                section('Conteúdo da sua face','Arraste os elementos para mudar a ordem ou use as setas. Clique para editar.',el(wp.element.Fragment,null,contentList(),el('p',{role:'status',className:'ja-order-status'},moveStatus))),
                 contentEditor(),
                 section('Adicionar elemento',null,el('div',{className:'ja-add-grid'},Object.entries(blockNames).map(([name,label])=>el(Button,{key:name,variant:'secondary',onClick:()=>addBlock(name)},'+ '+label)))),
-                el('p',{className:'ja-help'},'Para arrastar, reordenar ou criar colunas, volte ao editor de blocos.'));
+                el('p',{className:'ja-help'},'Use Alt + ↑ ou Alt + ↓ no item selecionado para reordenar pelo teclado. Para criar colunas e grupos, abra o editor de blocos.'));
+            if(cssOpen)return cssEditor();
             const normalize=value=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
             return el(wp.element.Fragment,null,
+                section('Personalização com código','CSS exclusivo desta face, com prévia ao vivo.',el(Button,{variant:'secondary',className:'ja-open-css',onClick:()=>setCSSOpen(true)},'Avançado')),
                 section('Ajustes avançados','Todos os controles continuam disponíveis aqui.',el(TextControl,{label:'Encontrar um ajuste',placeholder:'Ex.: fonte, borda, altura…',value:query,onChange:setQuery})),
                 query?el('div',null,Object.entries(design.schema.fields).filter(([,d])=>normalize(d.label).includes(normalize(query))).map(([key])=>field(key))):Object.entries(design.schema.groups).map(([group,label])=>el('details',{key:group,className:'ja-studio-disclosure'},el('summary',null,label),el('div',null,Object.entries(design.schema.fields).filter(([,d])=>d.group===group).map(([key])=>field(key))))),
                 disclosure('Restaurar a aparência',el('div',null,el('p',{className:'ja-help'},'Seus textos, imagens e blocos serão mantidos.'),el(Button,{variant:'secondary',isDestructive:true,onClick:()=>setReset(true)},'Restaurar aparência padrão'),reset?el('div',{className:'ja-reset-confirm'},el('p',null,'Restaurar os ajustes de aparência?'),el(Button,{variant:'primary',onClick:()=>{update(design.defaults);setReset(false);}},'Sim, restaurar'),el(Button,{variant:'tertiary',onClick:()=>setReset(false)},'Cancelar')):null)));
@@ -180,7 +233,7 @@
                         }},label))),
                         el('div',{className:'ja-studio-scroll',id:'ja-studio-panel',role:'tabpanel','aria-labelledby':'ja-tab-'+tab},body())),
                     el('main',{className:'ja-studio-canvas'},
-                        el(Preview,{content:state.content,settings,person,campaign,mobile,revision,onSelect:selectPreview}),
+                        el(Preview,{content:state.content,settings,customCSS,person,campaign,mobile,revision,onSelect:selectPreview}),
                         el('div',{className:'ja-preview-options'},
                             el('details',null,el('summary',null,'Testar nome e campanha'),el('div',null,el(TextControl,{label:'Nome do visitante',value:person,onChange:setPerson,maxLength:160}),el(TextControl,{label:'Tipo / campanha',value:campaign,onChange:setCampaign,maxLength:160}))),
                             el(Button,{variant:'tertiary',onClick:()=>setRevision(revision+1)},'Reabrir prévia')))),

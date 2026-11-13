@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Rewards Studio by CORE ( JOINADS )
  * Description: Faces visuais para rewards JoinAds, com editor de blocos e personalização por campanha.
- * Version: 0.4.0
+ * Version: 0.5.0
  * Requires at least: 6.6
  * Requires PHP: 7.4
  * License: GPL-2.0-or-later
@@ -17,11 +17,12 @@ defined('ABSPATH') || exit;
 require_once __DIR__ . '/includes/updates.php';
 Rewards_Studio_Updates::register(__FILE__);
 require_once __DIR__ . '/includes/appearance.php';
+require_once __DIR__ . '/includes/custom-css.php';
 require_once __DIR__ . '/includes/patterns.php';
 
 final class JoinAds_Reward_Studio {
     const TYPE = 'ja_reward_face';
-    const VERSION = '0.4.0';
+    const VERSION = '0.5.0';
     private static $render_cache = array();
 
     public static function boot() {
@@ -39,7 +40,7 @@ final class JoinAds_Reward_Studio {
 
     public static function register() {
         register_post_type(self::TYPE, array(
-            'labels' => array('name' => 'Faces de reward', 'singular_name' => 'Face de reward', 'add_new_item' => 'Criar face de reward', 'edit_item' => 'Editar face de reward'),
+            'labels' => array('name' => 'Reward Studio', 'menu_name' => 'Reward Studio', 'singular_name' => 'Face de reward', 'add_new_item' => 'Criar face de reward', 'edit_item' => 'Editar face de reward'),
             'public' => false, 'show_ui' => true, 'show_in_rest' => true,
             'menu_icon' => 'dashicons-art', 'supports' => array('title', 'editor', 'revisions', 'custom-fields'),
             'capabilities' => array_fill_keys(array('edit_post', 'read_post', 'delete_post', 'edit_posts', 'edit_others_posts', 'publish_posts', 'read_private_posts', 'delete_posts', 'delete_private_posts', 'delete_published_posts', 'delete_others_posts', 'edit_private_posts', 'edit_published_posts', 'create_posts'), 'manage_options'), 'map_meta_cap' => false,
@@ -56,11 +57,13 @@ final class JoinAds_Reward_Studio {
         wp_register_script('ja-reward-action-editor', plugins_url('assets/editor.js', __FILE__), array('wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'ja-reward-trigger-controls'), self::VERSION, true);
         foreach (array('action', 'countdown', 'badge', 'audience') as $block) register_block_type(__DIR__ . '/blocks/' . $block);
         JoinAds_Reward_Appearance::register(self::TYPE);
+        JoinAds_Reward_Custom_CSS::register(self::TYPE);
         joinads_reward_register_patterns();
     }
 
     public static function design_assets() {
-        wp_register_script('ja-reward-design', plugins_url('assets/design.js', __FILE__), array(), self::VERSION, true);
+        wp_register_script('ja-reward-custom-css', plugins_url('assets/custom-css.js', __FILE__), array(), self::VERSION, true);
+        wp_register_script('ja-reward-design', plugins_url('assets/design.js', __FILE__), array('ja-reward-custom-css'), self::VERSION, true);
         wp_add_inline_script('ja-reward-design', 'window.JoinAdsRewardDesignSchema=' . wp_json_encode(JoinAds_Reward_Appearance::schema()) . ';', 'before');
         wp_register_script('ja-reward-urgency', plugins_url('assets/urgency.js', __FILE__), array(), self::VERSION, true);
         wp_register_script('ja-reward-studio', plugins_url('assets/frontend.js', __FILE__), array('ja-reward-design', 'ja-reward-urgency'), self::VERSION, false);
@@ -74,7 +77,8 @@ final class JoinAds_Reward_Studio {
         wp_enqueue_script('ja-reward-design');
         wp_enqueue_style('ja-reward-studio-style');
         wp_enqueue_style('ja-reward-studio-editor', plugins_url('assets/editor.css', __FILE__), array(), self::VERSION);
-        wp_enqueue_script('ja-reward-studio-sidebar', plugins_url('assets/sidebar.js', __FILE__), array('ja-reward-design', 'ja-reward-trigger-controls', 'wp-plugins', 'wp-editor', 'wp-edit-post', 'wp-data', 'wp-element', 'wp-components', 'wp-block-editor'), self::VERSION, true);
+        wp_register_script('ja-reward-studio-order', plugins_url('assets/studio-order.js', __FILE__), array(), self::VERSION, true);
+        wp_enqueue_script('ja-reward-studio-sidebar', plugins_url('assets/sidebar.js', __FILE__), array('ja-reward-design', 'ja-reward-studio-order', 'ja-reward-trigger-controls', 'wp-plugins', 'wp-editor', 'wp-edit-post', 'wp-data', 'wp-element', 'wp-components', 'wp-block-editor'), self::VERSION, true);
         wp_add_inline_script('ja-reward-studio-sidebar', 'window.JoinAdsRewardStudio=' . wp_json_encode(array(
             'postId' => $post->ID, 'nonce' => wp_create_nonce('ja_preview_' . $post->ID),
             'previewUrl' => admin_url('admin-post.php'),
@@ -130,8 +134,10 @@ final class JoinAds_Reward_Studio {
         if (!$face || self::TYPE !== $face->post_type) wp_die('Face não encontrada.', '', array('response' => 404));
         $face = clone $face;
         $appearance = JoinAds_Reward_Appearance::get($id);
+        $custom_css = JoinAds_Reward_Custom_CSS::get($id);
         if (isset($request['content']) && is_string($request['content'])) $face->post_content = wp_unslash($request['content']);
         if (isset($request['appearance']) && is_string($request['appearance'])) $appearance = JoinAds_Reward_Appearance::sanitize(json_decode(wp_unslash($request['appearance']), true));
+        if (isset($request['custom_css']) && is_string($request['custom_css'])) $custom_css = JoinAds_Reward_Custom_CSS::sanitize(wp_unslash($request['custom_css']));
         $interactive = !empty($request['editor_preview']);
         $index = 0;
         $mark = function ($html, $block) use (&$index) {
@@ -141,7 +147,7 @@ final class JoinAds_Reward_Studio {
         };
         if ($interactive) add_filter('render_block', $mark, 20, 2);
         ob_start();
-        self::print_template($face, 'preview', $appearance, '');
+        self::print_template($face, 'preview', $appearance, '', $custom_css);
         $template = ob_get_clean();
         if ($interactive) remove_filter('render_block', $mark, 20);
         $embedded = !empty($request['embedded']);
@@ -171,8 +177,9 @@ final class JoinAds_Reward_Studio {
         exit;
     }
 
-    public static function print_template($face, $reward, $appearance, $campaign) {
-        printf('<template data-ja-face data-face-id="%s" data-reward-id="%s" data-campaign-type="%s" data-person-fallback="%s" data-type-fallback="%s" data-appearance="%s">', esc_attr($face->ID), esc_attr($reward), esc_attr($campaign), esc_attr(get_post_meta($face->ID, '_ja_person_fallback', true) ?: 'Visitante'), esc_attr(get_post_meta($face->ID, '_ja_type_fallback', true) ?: 'seu interesse'), esc_attr(wp_json_encode($appearance)));
+    public static function print_template($face, $reward, $appearance, $campaign, $custom_css = null) {
+        if (null === $custom_css) $custom_css = JoinAds_Reward_Custom_CSS::get($face->ID);
+        printf('<template data-ja-face data-face-id="%s" data-reward-id="%s" data-campaign-type="%s" data-person-fallback="%s" data-type-fallback="%s" data-appearance="%s" data-custom-css="%s">', esc_attr($face->ID), esc_attr($reward), esc_attr($campaign), esc_attr(get_post_meta($face->ID, '_ja_person_fallback', true) ?: 'Visitante'), esc_attr(get_post_meta($face->ID, '_ja_type_fallback', true) ?: 'seu interesse'), esc_attr(wp_json_encode($appearance)), esc_attr($custom_css));
         echo self::render_face($face);
         echo '</template>';
     }

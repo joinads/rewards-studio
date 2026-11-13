@@ -67,10 +67,23 @@
 .ja-studio-image > img { width:100%; max-height:150px; object-fit:cover; border-radius:8px; display:block; margin-bottom:10px; }
 .ja-image-empty { padding:24px 14px; background:#f3f6fb; border:1px dashed #c9d3e4; border-radius:8px; font-size:12px; text-align:center; color:#7a879e; margin-bottom:12px; }
 .ja-content-list { display:flex; flex-direction:column; gap:5px; }
-.ja-content-row { width:100%; display:flex; align-items:center; gap:10px; border:1px solid #e4e9f1; border-radius:7px; padding:10px; cursor:pointer; text-align:left; background:#fff; color:#53627d; min-width:0; }
+.ja-content-row { position:relative; width:100%; display:flex; align-items:center; gap:5px; border:1px solid #e4e9f1; border-radius:7px; padding:5px; text-align:left; background:#fff; color:#53627d; min-width:0; }
 .ja-content-row.is-selected { background:#f0f5ff; border-color:#8eaff3; }
 .ja-content-row strong { display:block; font:600 12px/1.5 system-ui; }
-.ja-content-row small { display:block; font:11px/1.5 system-ui; color:#8994a7; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:218px; }
+.ja-content-row small { display:block; font:11px/1.5 system-ui; color:#8994a7; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ja-content-grip { flex:none; font-size:20px; color:#8b9bb4; cursor:grab; padding:4px 0; }
+.ja-content-row[draggable=false] .ja-content-grip { cursor:default; opacity:.35; }
+.ja-content-select { flex:1; min-width:0; display:flex; align-items:center; gap:8px; padding:5px 0; background:none; border:0; cursor:pointer; color:inherit; text-align:left; }
+.ja-content-summary { flex:1; min-width:0; }
+.ja-content-movers { flex:none; display:flex; flex-direction:column; gap:2px; }
+.ja-content-movers button { width:28px; height:25px; padding:0; border:1px solid #dce4ef; border-radius:4px; background:#fff; color:#526b91; font-size:15px; cursor:pointer; }
+.ja-content-movers button:hover:not(:disabled) { background:#e4edff; border-color:#8eaff3; }
+.ja-content-movers button:disabled { cursor:default; opacity:.3; }
+.ja-content-row.is-dragging { opacity:.4; }
+.ja-content-row.is-drop-before::before,.ja-content-row.is-drop-after::after { content:''; height:3px; border-radius:2px; background:#2563eb; position:absolute; left:0; right:0; z-index:2; }
+.ja-content-row.is-drop-before::before { top:-5px; }.ja-content-row.is-drop-after::after { bottom:-5px; }
+.ja-order-status { margin:8px 0 0; color:#33694e; font-size:11px; min-height:0; }
+.ja-order-status:empty { display:none; }
 .ja-content-index { font:10px ui-monospace,monospace; color:#99a7bd; }
 .ja-content-editor { padding:18px 14px 0; border-radius:8px; border:1px solid #d9e4f8; background:#f7faff; margin-bottom:24px; }
 .ja-control-label { display:block; font-size:12px; color:#53627b; margin:12px 0 8px; }
@@ -105,3 +118,14 @@
 .ja-studio-entry { display:block!important; padding-top:12px; }
 .ja-studio-entry .ja-help { font-size:12px; line-height:1.5; margin:0 0 8px; }
 .ja-studio-entry .ja-open-studio { display:flex; margin:0 0 4px; }
+.ja-open-css.components-button { width:100%; justify-content:center; border-radius:7px; }
+.ja-css-editor { display:block; width:100%; min-height:300px; resize:vertical; padding:14px 12px; border:1px solid #c7d4e8; border-radius:8px; background:#10213b; color:#e0edff; font:12px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace; tab-size:2; white-space:pre; overflow:auto; }
+.ja-css-editor::placeholder { color:#9bacc6; opacity:1; }
+.ja-css-editor:focus { border-color:#2563eb; outline:2px solid #93b5fa; outline-offset:1px; }
+.ja-css-meta { display:flex; justify-content:space-between; gap:8px; color:#7d8ba3; font-size:10px; margin-top:8px; }
+.ja-css-feedback { font-size:12px; line-height:1.6; color:#426751; padding:10px 12px; border-radius:6px; background:#edf7f0; }
+.ja-css-feedback.is-error { color:#9a3412; background:#fff2e6; }
+.ja-css-examples { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.ja-css-examples .components-button { justify-content:center; border-radius:6px; }
+.ja-css-reference p { font-size:12px; line-height:1.7; margin:0 0 12px; }
+.ja-css-reference code { font-size:11px; overflow-wrap:anywhere; }

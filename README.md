@@ -14,18 +14,20 @@ Editor visual de faces de reward para WordPress, integrado à tag do Core. A apa
 
 ## Personalização
 
-Em **Faces de reward**, crie uma face, informe o **Public ID (ULID)** do reward e publique. O ID deve coincidir com o reward selecionado pela tag no site. Opcionalmente, informe o valor exato de `?type=` para uma face por campanha; essa face tem prioridade sobre a face geral do mesmo reward.
+Em **Reward Studio**, crie uma face, informe o **Public ID (ULID)** do reward e publique. O ID deve coincidir com o reward selecionado pela tag no site. Opcionalmente, informe o valor exato de `?type=` para uma face por campanha; essa face tem prioridade sobre a face geral do mesmo reward.
 
 Clique em **Abrir estúdio visual** nas configurações da face ou abra **Personalizar reward** na barra superior:
 
 - **Formato:** Modal central, Tela cheia, Painel inferior ou Painel lateral. Um clique aplica a geometria no desktop e no celular, preservando cores, fontes e conteúdo.
 - **Estilo:** paletas, cores, fundos, imagens e tipografia. Trocar a paleta preserva o formato.
-- **Conteúdo:** clique em um elemento da prévia para editar título, texto, imagem, botão, aviso ou contador. Há atalhos para adicionar elementos. Estruturas mais complexas e reordenação continuam disponíveis no editor de blocos.
-- **Mais:** todos os controles avançados, com busca por nome.
+- **Conteúdo:** clique em um elemento da prévia para editar título, texto, imagem, botão, aviso ou contador. Arraste os itens de “Conteúdo da sua face” para reordenar, use as setas ou Alt + ↑/↓. Os blocos e seus atributos são preservados. Estruturas mais complexas continuam disponíveis no editor de blocos.
+- **Mais:** todos os controles avançados, com busca por nome. O botão **Avançado** abre o CSS personalizado da face, com exemplos e prévia ao vivo.
 
 **Para tela cheia:** Estúdio visual → Formato → Tela cheia. O conteúdo fica centralizado com largura de leitura ajustável. Confira **Desktop** e **Celular**, clique em **Concluído** e salve a face no WordPress. A prévia não publica nem solicita anúncios.
 
 Inclua ao menos um bloco **Ação do reward → Assistir anúncio**. O botão acompanha o estado de prontidão do botão original e encaminha o clique a ele. Fechamento também obedece ao Core.
+
+Em **Mais → Avançado**, use `.ja-face` para o conteúdo, `.ja-face h2` para títulos, `.ja-face-button` para botões, `.ja-designed-modal` para a janela e `.ja-designed-overlay` para o fundo. O CSS aceita seletores completos, pseudoelementos, `@media`, `@supports` e `@keyframes`; regras aninhadas, importações e outras regras globais não são aplicadas. Use `!important` para substituir propriedades fixas da janela. O limite é de 20.000 caracteres. Erros aparecem no painel e desativam o CSS adicional na prévia. Salve a face no WordPress para publicar; o CSS acompanha as revisões. As regras ficam limitadas à instância do reward e são removidas antes da entrega nativa.
 
 ### Nome e campanha
 
