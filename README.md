@@ -21,6 +21,7 @@ Clique em **Abrir estúdio visual** nas configurações da face ou abra **Person
 - **Formato:** Modal central, Tela cheia, Painel inferior ou Painel lateral. Um clique aplica a geometria no desktop e no celular, preservando cores, fontes e conteúdo.
 - **Estilo:** paletas, cores, fundos, imagens e tipografia. Trocar a paleta preserva o formato.
 - **Conteúdo:** clique em um elemento da prévia para editar título, texto, imagem, botão, aviso ou contador. Arraste os itens de “Conteúdo da sua face” para reordenar, use as setas ou Alt + ↑/↓. Os blocos e seus atributos são preservados. Estruturas mais complexas continuam disponíveis no editor de blocos.
+- **Remover conteúdo:** clique na lixeira do item ou em **Remover elemento** no painel de edição e confirme. A prévia atualiza imediatamente; salve no WordPress para publicar a exclusão. Itens bloqueados não podem ser removidos. Ao excluir todos os elementos de uma linha criada pelo Studio, a linha vazia também é removida. Se excluir o último botão de anúncio, adicione outro para continuar exibindo a face.
 - **Mais:** todos os controles avançados, com busca por nome. O botão **Avançado** abre o CSS personalizado da face, com exemplos e prévia ao vivo.
 
 **Para tela cheia:** Estúdio visual → Formato → Tela cheia. O conteúdo fica centralizado com largura de leitura ajustável. Confira **Desktop** e **Celular**, clique em **Concluído** e salve a face no WordPress. A prévia não publica nem solicita anúncios.

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Rewards Studio by CORE ( JOINADS )
  * Description: Faces visuais para rewards JoinAds, com editor de blocos e personalização por campanha.
- * Version: 0.6.0
+ * Version: 0.6.1
  * Requires at least: 6.6
  * Requires PHP: 7.4
  * License: GPL-2.0-or-later
@@ -22,7 +22,7 @@ require_once __DIR__ . '/includes/patterns.php';
 
 final class JoinAds_Reward_Studio {
     const TYPE = 'ja_reward_face';
-    const VERSION = '0.6.0';
+    const VERSION = '0.6.1';
     private static $render_cache = array();
 
     public static function boot() {

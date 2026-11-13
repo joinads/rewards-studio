@@ -1,7 +1,7 @@
 === Rewards Studio by CORE ( JOINADS ) ===
 Requires at least: 6.6
 Requires PHP: 7.4
-Stable tag: 0.6.0
+Stable tag: 0.6.1
 License: GPLv2 or later
 
 Editor de faces para rewards JoinAds. Usa os botões e o fluxo originais do Core.
@@ -16,6 +16,8 @@ Editor de faces para rewards JoinAds. Usa os botões e o fluxo originais do Core
 7. Salve e publique quando estiver pronto.
 
 Em Conteúdo da sua face, arraste os elementos ou use as setas para mudar a ordem. Alt + ↑/↓ também funciona no item selecionado. Grupos e atributos dos blocos são preservados e bloqueios do editor são respeitados.
+
+Para excluir um conteúdo pelo Studio, clique na lixeira do item ou em Remover elemento no painel de edição e confirme. A prévia atualiza; salve no WordPress para publicar a exclusão. Blocos bloqueados são preservados, assim como os outros elementos da linha. Linhas criadas pelo Studio são retiradas quando ficam vazias. Se remover o último botão de anúncio, adicione outro para continuar exibindo a face.
 
 Para colocar Conteúdo exclusivo à esquerda e a audiência à direita, selecione o texto na lista, escolha a audiência em Elemento à direita e clique em Colocar lado a lado. Em Layout da linha, escolha Pontas opostas, ajuste o espaço e o comportamento no celular. Também pode usar colunas iguais, inverter a ordem ou Separar elementos. É uma Linha nativa do WordPress, com atributos dos elementos preservados.
 
@@ -51,6 +53,8 @@ Download: https://github.com/joinads/rewards-studio/releases/latest/download/rew
 A partir da versão 0.3.2, o plugin ativo consulta as releases públicas pelo sistema nativo de atualizações do WordPress. Use Verificar atualizações na lista de plugins para antecipar a consulta. Para instalação automática, ative Ativar atualizações automáticas no WordPress. Nenhum token do GitHub é necessário no site. Quem está na versão 0.3.1 ou anterior precisa instalar a 0.3.2 manualmente uma vez.
 
 == Changelog ==
+= 0.6.1 =
+Remoção de elementos pelo Studio com lixeira, confirmação, respeito aos bloqueios e limpeza de linhas vazias.
 = 0.6.0 =
 Layout lado a lado com distribuição, espaçamento e comportamento no celular, usando blocos nativos. Personalização person com Base64, UTF-8 e compatibilidade com texto normal. Novo parâmetro opcional model para conteúdo livre.
 = 0.5.0 =

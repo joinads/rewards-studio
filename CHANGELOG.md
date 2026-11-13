@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.1 — 2026-11-13
+
+- Lixeira na lista de conteúdo e botão Remover elemento no painel de edição do Studio.
+- Confirmação identifica o elemento; cancelar mantém o conteúdo e os bloqueios do WordPress são respeitados.
+- A prévia e a seleção acompanham a exclusão. Linhas criadas pelo Studio são retiradas quando ficam vazias, preservando os demais elementos e grupos.
+- Aviso ao remover o último botão de anúncio e manutenção da opção de adicionar um novo.
+
 ## 0.6.0 — 2026-11-13
 
 - Novo controle Conteúdo → Colocar lado a lado para organizar dois elementos em uma linha, inclusive quando estavam em grupos diferentes.

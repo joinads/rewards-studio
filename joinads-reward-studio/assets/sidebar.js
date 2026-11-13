@@ -76,7 +76,13 @@
         const [cssOpen,setCSSOpen]=useState(false),[clearCSS,setClearCSS]=useState(false);
         const [dragging,setDragging]=useState(''),[dropTarget,setDropTarget]=useState(null),[moveStatus,setMoveStatus]=useState('');
         const [partnerId,setPartnerId]=useState('');
+        const [removeId,setRemoveId]=useState('');
         const history=useRef([]),dragSource=useRef('');
+        useEffect(()=>{
+            if(!removeId||!open)return;
+            const panel=document.querySelector('.ja-studio-scroll');if(panel)panel.scrollTop=0;
+            const cancel=document.getElementById('ja-cancel-remove');if(cancel)cancel.focus();
+        },[removeId,open]);
         if(state.postType!=='ja_reward_face')return null;
         const settings=design.sanitize(state.meta[metaKey]);
         const customCSS=state.meta._ja_custom_css || '';
@@ -84,6 +90,7 @@
         const blocks=order.flatten(state.blocks);
         const editable=blocks.filter(block=>blockNames[block.name]);
         const active=editable.find(block=>block.clientId===selected) || editable[0];
+        const removing=editable.find(block=>block.clientId===removeId);
         const hasWatch=blocks.some(block=>block.name==='joinads/reward-action' && block.attributes.action!=='close');
         function remember(){history.current=[...history.current.slice(-29),{settings,customCSS}];setUndoCount(history.current.length);}
         function update(values){
@@ -106,6 +113,46 @@
             setSelected(sourceId);setMoveStatus('Ordem atualizada. Confira a prévia.');
         }
         function endDrag(){dragSource.current='';setDragging('');setDropTarget(null);}
+        function cancelRemoval(){
+            const id=removeId;setRemoveId('');
+            requestAnimationFrame(()=>{
+                const row=Array.from(document.querySelectorAll('.ja-content-row')).find(node=>node.dataset.jaContentId===id);
+                if(row)row.querySelector('.ja-content-remove').focus();
+            });
+        }
+        function removalConfirmation(){return el('section',{className:'ja-remove-panel','aria-labelledby':'ja-remove-title'},
+            el('h3',{id:'ja-remove-title'},'Remover elemento?'),el('p',null,'Remover este elemento da face?'),
+            el('div',{className:'ja-remove-summary'},el('strong',null,blockNames[removing.name]),el('p',null,plain(removing.attributes.content||removing.attributes.label||removing.attributes.alt||'Imagem').slice(0,160))),
+            removing.name==='joinads/reward-action'&&removing.attributes.action!=='close'&&blocks.filter(block=>block.name==='joinads/reward-action'&&block.attributes.action!=='close').length===1?el('p',{className:'ja-remove-notice'},'Este é o último botão de anúncio. Após removê-lo, adicione outro para a face continuar sendo exibida no site.'):null,
+            !wp.data.select('core/block-editor').canRemoveBlock(removeId)?el('p',{className:'ja-remove-notice'},'Este elemento está bloqueado para remoção no WordPress.'):null,
+            el('div',{className:'ja-remove-actions'},el(Button,{id:'ja-cancel-remove',variant:'secondary',onClick:cancelRemoval},'Cancelar'),el(Button,{variant:'primary',isDestructive:true,disabled:!wp.data.select('core/block-editor').canRemoveBlock(removeId),onClick:removeElement},'Sim, remover')));
+        }
+        function removeElement(){
+            const store=wp.data.select('core/block-editor');
+            if(!removing||!store.getBlock(removeId)||!store.canRemoveBlock(removeId))return;
+            const index=editable.findIndex(block=>block.clientId===removeId);
+            const next=editable[index+1]||editable[index-1];
+            let parentId=store.getBlockRootClientId(removeId)||'';
+            blockActions.removeBlocks([removeId],false);
+            if(store.getBlock(removeId))return;
+            // Only clean up empty rows created by the Studio. Keep native groups,
+            // remaining elements, layout settings and protected containers intact.
+            while(parentId){
+                const parent=store.getBlock(parentId);
+                if(!parent||(parent.attributes.className||'').split(/\s+/).indexOf('ja-studio-row')===-1||parent.innerBlocks.length||!store.canRemoveBlock(parentId))break;
+                const outer=store.getBlockRootClientId(parentId)||'';
+                blockActions.removeBlocks([parentId],false);
+                if(store.getBlock(parentId))break;
+                parentId=outer;
+            }
+            setRemoveId('');setSelected(next?next.clientId:'');setPartnerId('');endDrag();
+            setMoveStatus('Elemento removido. Salve no WordPress para atualizar a face.');
+            requestAnimationFrame(()=>{
+                const row=Array.from(document.querySelectorAll('.ja-content-row')).find(node=>next&&node.dataset.jaContentId===next.clientId);
+                const button=row?row.querySelector('.ja-content-select'):document.querySelector('.ja-add-grid button');
+                if(button)button.focus();
+            });
+        }
         function parentRow(block){return block && blocks.find(parent=>parent.clientId===block.rootClientId&&layout.isRow(parent));}
         function canGroup(sourceId,targetId){
             const plan=layout.groupPlan(state.blocks,sourceId,targetId),store=wp.data.select('core/block-editor');
@@ -168,6 +215,7 @@
                 el('button',{type:'button',className:'ja-content-select','aria-pressed':!!active&&active.clientId===block.clientId,onClick:()=>setSelected(block.clientId),onKeyDown:event=>{
                     if(event.altKey&&['ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();const target=event.key==='ArrowUp'?previous:next;if(target)move(block.clientId,target.clientId,event.key==='ArrowDown');}
                 }},el('span',{className:'ja-content-index'},String(index+1).padStart(2,'0')),el('span',{className:'ja-content-summary'},el('strong',null,blockNames[block.name]),el('small',null,plain(block.attributes.content || block.attributes.label || block.attributes.alt || 'Escolher imagem').slice(0,64)),row?el('span',{className:'ja-line-chip'},'↔ Linha '+(blocks.filter(layout.isRow).findIndex(item=>item.clientId===row.clientId)+1)):null)),
+                el('button',{type:'button',className:'ja-content-remove','aria-label':'Remover '+label,title:'Remover elemento',disabled:!wp.data.select('core/block-editor').canRemoveBlock(block.clientId),onClick:()=>setRemoveId(block.clientId)},el('svg',{width:16,height:16,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.7,'aria-hidden':true,focusable:false},el('path',{d:'M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7'}))),
                 el('div',{className:'ja-content-movers'},el('button',{type:'button','aria-label':'Subir '+label,title:'Subir (Alt + ↑)',disabled:!previous||!movement(block.clientId,previous.clientId,false),onClick:()=>move(block.clientId,previous.clientId,false)},'↑'),el('button',{type:'button','aria-label':'Descer '+label,title:'Descer (Alt + ↓)',disabled:!next||!movement(block.clientId,next.clientId,true),onClick:()=>move(block.clientId,next.clientId,true)},'↓')));
         }));}
         function cssEditor(){
@@ -237,7 +285,7 @@
                     a.expiry!=='hide'?el(TextControl,{key:'expiredLabel',label:'Mensagem final',value:a.expiredLabel,onChange:expiredLabel=>patch({expiredLabel})}):null);
             }
             if(window.JoinAdsRewardTriggerControls)controls.push(el('div',{key:'trigger-settings'},window.JoinAdsRewardTriggerControls.controls(active.name,a,patch)));
-            return el('div',{className:'ja-content-editor'},el('h3',null,'Editar '+blockNames[active.name].toLowerCase()),controls,
+            return el('div',{className:'ja-content-editor'},el('div',{className:'ja-content-editor-heading'},el('h3',null,'Editar '+blockNames[active.name].toLowerCase()),el(Button,{variant:'tertiary',isDestructive:true,disabled:!wp.data.select('core/block-editor').canRemoveBlock(active.clientId),onClick:()=>setRemoveId(active.clientId)},'Remover elemento')),controls,
                 el(Button,{variant:'tertiary',onClick:()=>{blockActions.selectBlock(active.clientId);setOpen(false);}},'Abrir este bloco no conteúdo'));
         }
         function body(){
@@ -274,18 +322,18 @@
             el(sidebar.PluginSidebarMoreMenuItem,{target:'ja-reward-design'},'Personalizar reward'),
             el(sidebar.PluginSidebar,{name:'ja-reward-design',title:'Personalizar reward',icon:'art'},
                 el('div',{className:'ja-studio-launcher'},el('span',{className:'ja-studio-eyebrow'},'REWARDS STUDIO · CORE ( JOINADS )'),el('h2',null,'Sua face, do seu jeito.'),el('p',null,'Escolha o formato, ajuste o visual e edite o conteúdo vendo tudo na mesma tela.'),el(Button,{variant:'primary',className:'ja-open-studio',onClick:()=>setOpen(true)},'Abrir estúdio visual'),el('h3',null,'Formato em um clique'),formats(true),el('p',{className:'ja-help'},'Cores e conteúdo são preservados. Salve no WordPress depois de personalizar.'))),
-            open?el(Modal,{title:'Personalizar reward',onRequestClose:()=>setOpen(false),className:'ja-studio-modal',shouldCloseOnClickOutside:false},
+            open?el(Modal,{title:'Personalizar reward',onRequestClose:()=>{setRemoveId('');setOpen(false);},className:'ja-studio-modal',shouldCloseOnClickOutside:false},
                 el('div',{className:'ja-studio-toolbar'},
                     el('div',{className:'ja-studio-brand'},el('span',{className:'ja-brand-mark','aria-hidden':true},'J'),el('div',null,el('strong',null,'Sua face em tempo real'),el('small',null,'Escolha, personalize e confira o resultado.'))),
                     el('div',{className:'ja-device-switch','aria-label':'Dispositivo da prévia'},el('button',{type:'button','aria-pressed':!mobile,onClick:()=>setMobile(false)},'Desktop'),el('button',{type:'button','aria-pressed':mobile,onClick:()=>setMobile(true)},'Celular')),
-                    el('div',{className:'ja-studio-actions'},el(Button,{variant:'tertiary',disabled:!undoCount,onClick:undo},'Desfazer ajuste'),el(Button,{variant:'primary',onClick:()=>setOpen(false)},'Concluído'))),
+                    el('div',{className:'ja-studio-actions'},el(Button,{variant:'tertiary',disabled:!undoCount,onClick:undo},'Desfazer ajuste'),el(Button,{variant:'primary',onClick:()=>{setRemoveId('');setOpen(false);}},'Concluído'))),
                 !hasWatch?el('div',{className:'ja-studio-warning',role:'status'},'A face precisa de um botão para assistir ao anúncio. ',el(Button,{variant:'link',onClick:()=>addBlock('joinads/reward-action')},'Adicionar botão')):null,
                 el('div',{className:'ja-studio-workspace'},
                     el('aside',{className:'ja-studio-controls','aria-label':'Controles do reward'},
-                        el('div',{className:'ja-studio-tabs',role:'tablist','aria-label':'Personalização'},[['format','Formato'],['style','Estilo'],['content','Conteúdo'],['advanced','Mais']].map(([key,label],index,list)=>el('button',{type:'button',key,id:'ja-tab-'+key,role:'tab','aria-controls':'ja-studio-panel','aria-selected':tab===key,tabIndex:tab===key?0:-1,onClick:()=>setTab(key),onKeyDown:event=>{
-                            if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?list.length-1:(index+(event.key==='ArrowRight'?1:-1)+list.length)%list.length;setTab(list[next][0]);event.currentTarget.parentElement.children[next].focus();
+                        el('div',{className:'ja-studio-tabs',role:'tablist','aria-label':'Personalização'},[['format','Formato'],['style','Estilo'],['content','Conteúdo'],['advanced','Mais']].map(([key,label],index,list)=>el('button',{type:'button',key,id:'ja-tab-'+key,role:'tab','aria-controls':'ja-studio-panel','aria-selected':tab===key,tabIndex:tab===key?0:-1,onClick:()=>{setRemoveId('');setTab(key);},onKeyDown:event=>{
+                            if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?list.length-1:(index+(event.key==='ArrowRight'?1:-1)+list.length)%list.length;setRemoveId('');setTab(list[next][0]);event.currentTarget.parentElement.children[next].focus();
                         }},label))),
-                        el('div',{className:'ja-studio-scroll',id:'ja-studio-panel',role:'tabpanel','aria-labelledby':'ja-tab-'+tab},body())),
+                        el('div',{className:'ja-studio-scroll',id:'ja-studio-panel',role:'tabpanel','aria-labelledby':'ja-tab-'+tab},removing?removalConfirmation():body())),
                     el('main',{className:'ja-studio-canvas'},
                         el(Preview,{content:state.content,settings,customCSS,person,campaign,model,mobile,revision,onSelect:selectPreview}),
                         el('div',{className:'ja-preview-options'},
